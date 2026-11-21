@@ -16,12 +16,14 @@ let endModalShown = false;
 
 // ---------- Audio (simple beeps, no assets) ----------
 let audioCtx = null;
+let soundEnabled = true;
 function ensureAudio() {
+  if (!soundEnabled) return;
   if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
 }
 function beep(freq = 440, dur = 0.08, type = "sine", gain = 0.035) {
-  if (!audioCtx) return;
+  if (!soundEnabled || !audioCtx) return;
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
   o.type = type;
@@ -49,6 +51,101 @@ $("#homeBtn").addEventListener("click", () => { showScreen("map"); renderMap(); 
 $("#homeBtn").addEventListener("keydown", (e) => { if (e.key === "Enter") { showScreen("map"); renderMap(); } });
 $("#backToMapBtn").addEventListener("click", () => { showScreen("map"); renderMap(); });
 $("#restartBtn").addEventListener("click", () => { if (currentLevelId) startLevel(currentLevelId); });
+$("#soundBtn").addEventListener("click", () => {
+  soundEnabled = !soundEnabled;
+  $("#soundBtn").textContent = soundEnabled ? "🔊" : "🔇";
+  if (soundEnabled) ensureAudio();
+});
+
+// ---------- Visual FX ----------
+function initSparkles() {
+  const wrap = $("#bgSparkles");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  for (let i = 0; i < 28; i++) {
+    const s = document.createElement("span");
+    s.className = "bg-sparkle";
+    s.style.left = Math.random() * 100 + "%";
+    s.style.top = Math.random() * 100 + "%";
+    s.style.setProperty("--dur", (2.4 + Math.random() * 3.2).toFixed(2) + "s");
+    s.style.setProperty("--delay", (-Math.random() * 4).toFixed(2) + "s");
+    const size = 2 + Math.random() * 4;
+    s.style.width = size + "px";
+    s.style.height = size + "px";
+    wrap.appendChild(s);
+  }
+}
+
+function spawnFloatText(text, opts = {}) {
+  const layer = $("#fxLayer");
+  if (!layer) return;
+  const el = document.createElement("div");
+  el.className = "float-text" + (opts.combo ? " combo" : "");
+  el.textContent = text;
+  el.style.left = (opts.x ?? 50) + "%";
+  el.style.top = (opts.y ?? 45) + "%";
+  layer.appendChild(el);
+  setTimeout(() => el.remove(), 950);
+}
+
+function spawnSparks(marked) {
+  const layer = $("#fxLayer");
+  const board = $("#board");
+  if (!layer || !board || !marked) return;
+  const rect = board.getBoundingClientRect();
+  const cellW = rect.width / 8;
+  const cellH = rect.height / 8;
+  const colors = ["#ffd84a","#fff","#ff7eb8","#7ee8c7","#7cc4ff"];
+  let count = 0;
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      if (!marked[r] || !marked[r][c]) continue;
+      const cx = c * cellW + cellW / 2;
+      const cy = r * cellH + cellH / 2;
+      for (let i = 0; i < 3; i++) {
+        if (count++ > 60) return;
+        const sp = document.createElement("span");
+        sp.className = "spark";
+        sp.style.left = cx + "px";
+        sp.style.top = cy + "px";
+        sp.style.color = colors[Math.floor(Math.random()*colors.length)];
+        const ang = Math.random() * Math.PI * 2;
+        const dist = 18 + Math.random() * 28;
+        sp.style.setProperty("--dx", Math.cos(ang)*dist + "px");
+        sp.style.setProperty("--dy", Math.sin(ang)*dist + "px");
+        layer.appendChild(sp);
+        setTimeout(() => sp.remove(), 700);
+      }
+    }
+  }
+}
+
+function shakeBoard() {
+  const b = $("#board");
+  if (!b) return;
+  b.classList.remove("shake");
+  void b.offsetWidth;
+  b.classList.add("shake");
+}
+
+function burstConfetti() {
+  const wrap = $("#confetti");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  const colors = ["#ffd84a","#ff7eb8","#7ee8c7","#7cc4ff","#b59cff","#fff","#ff9f43"];
+  for (let i = 0; i < 80; i++) {
+    const p = document.createElement("span");
+    p.className = "confetti-piece";
+    p.style.left = Math.random() * 100 + "%";
+    p.style.background = colors[Math.floor(Math.random()*colors.length)];
+    p.style.setProperty("--fall", (2.2 + Math.random() * 2.4).toFixed(2) + "s");
+    p.style.animationDelay = (Math.random() * 0.5).toFixed(2) + "s";
+    p.style.width = (7 + Math.random() * 8) + "px";
+    p.style.height = (9 + Math.random() * 10) + "px";
+    p.style.opacity = String(0.75 + Math.random() * 0.25);
+    wrap.appendChild(p);
+  }
+}
 
 // ---------- Map / Story ----------
 function renderTopbar() {
@@ -149,9 +246,15 @@ function startLevel(levelId) {
   engine = new GameEngine(level, {
     onSwap: (a, b) => { sfxSwap(); renderBoard(engine.board, []); },
     onSwapBack: () => { sfxBad(); renderBoard(engine.board, []); },
-    onMatch: ({ marked, combo }) => {
+    onMatch: ({ marked, combo, gain }) => {
       sfxMatch(combo);
       renderBoard(engine.board, marked);
+      spawnSparks(marked);
+      if (combo > 1) {
+        spawnFloatText(`Комбо x${combo}!`, { x: 50, y: 42, combo: true });
+        shakeBoard();
+      }
+      spawnFloatText(`+${gain}`, { x: 50 + (Math.random()*18-9), y: 52 + (Math.random()*10-5) });
       updateHUD();
     },
     onClear: (board) => { renderBoard(board, []); },
@@ -265,6 +368,7 @@ function showEndModal(snap) {
     saveState(state);
     renderTopbar();
     sfxWin();
+    burstConfetti();
   } else {
     sfxLose();
   }
@@ -317,9 +421,10 @@ function showEndModal(snap) {
   modal.classList.remove("hidden");
 }
 
-function hideModal() { $("#modal").classList.add("hidden"); }
+function hideModal() { $("#modal").classList.add("hidden"); $("#confetti").innerHTML = ""; }
 $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") { /* don't close on backdrop during end */ } });
 
 // ---------- Init ----------
+initSparkles();
 renderMap();
 showScreen("map");

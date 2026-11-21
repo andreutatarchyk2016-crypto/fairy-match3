@@ -15,6 +15,8 @@
       <span class="orb orb-a"></span>
       <span class="orb orb-b"></span>
       <span class="orb orb-c"></span>
+      <span class="orb orb-d"></span>
+      <div class="bg-sparkles" id="bgSparkles"></div>
     </div>
 
     <header class="topbar">
@@ -26,6 +28,7 @@
         </div>
       </div>
       <div class="topbar-stats">
+        <button class="pill pill-btn" id="soundBtn" title="Звук" aria-label="Переключить звук">🔊</button>
         <div class="pill" title="Звёзды">
           <span class="pill-icon">★</span>
           <span id="starBank">0</span>
@@ -109,6 +112,7 @@
           <div class="panel board-panel">
             <div class="board-wrap">
               <div id="board" class="board" aria-label="Игровое поле"></div>
+              <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
               <div id="boardOverlay" class="board-overlay hidden"></div>
             </div>
           </div>
@@ -117,6 +121,7 @@
     </main>
 
     <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+      <div id="confetti" class="confetti" aria-hidden="true"></div>
       <div class="modal-card">
         <div class="modal-stars" id="modalStars"></div>
         <h2 id="modalTitle"></h2>
