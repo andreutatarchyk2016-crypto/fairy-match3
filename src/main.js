@@ -147,6 +147,37 @@ function burstConfetti() {
   }
 }
 
+function tileEl(r, c) {
+  return document.querySelector(`.tile[data-r="${r}"][data-c="${c}"]`);
+}
+
+function animateSwapTiles(a, b, duration = 220) {
+  const elA = tileEl(a.r, a.c);
+  const elB = tileEl(b.r, b.c);
+  if (!elA || !elB) return Promise.resolve();
+  const ra = elA.getBoundingClientRect();
+  const rb = elB.getBoundingClientRect();
+  const dx = rb.left - ra.left;
+  const dy = rb.top - ra.top;
+  const ease = "cubic-bezier(.2,.85,.25,1)";
+  [elA, elB].forEach((el) => {
+    el.style.transition = `transform ${duration}ms ${ease}`;
+    el.style.zIndex = "3";
+  });
+  elA.style.transform = `translate(${dx}px, ${dy}px)`;
+  elB.style.transform = `translate(${-dx}px, ${-dy}px)`;
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      [elA, elB].forEach((el) => {
+        el.style.transition = "";
+        el.style.transform = "";
+        el.style.zIndex = "";
+      });
+      resolve();
+    }, duration);
+  });
+}
+
 // ---------- Map / Story ----------
 function renderTopbar() {
   $("#starBank").textContent = String(starBank(state, UPGRADES));
@@ -244,8 +275,16 @@ function startLevel(levelId) {
   endModalShown = false;
   hideModal();
   engine = new GameEngine(level, {
-    onSwap: (a, b) => { sfxSwap(); renderBoard(engine.board, []); },
-    onSwapBack: () => { sfxBad(); renderBoard(engine.board, []); },
+    onSwap: async (a, b) => {
+      sfxSwap();
+      await animateSwapTiles(a, b, 220);
+      renderBoard(engine.board, []);
+    },
+    onSwapBack: async (a, b) => {
+      sfxBad();
+      await animateSwapTiles(a, b, 200);
+      renderBoard(engine.board, []);
+    },
     onMatch: ({ marked, combo, gain }) => {
       sfxMatch(combo);
       renderBoard(engine.board, marked);
@@ -258,7 +297,11 @@ function startLevel(levelId) {
       updateHUD();
     },
     onClear: (board) => { renderBoard(board, []); },
-    onRefill: (board) => { renderBoard(board, [], true); updateHUD(); },
+    onRefill: (board, movements) => {
+      const spawnSet = new Set((movements || []).map((m) => m.toR + "," + m.toC));
+      renderBoard(board, [], spawnSet.size ? spawnSet : true);
+      updateHUD();
+    },
     onState: () => { updateHUD(); },
     onMove: () => { updateHUD(); },
   });
@@ -297,12 +340,19 @@ function updateHUD() {
 function renderBoard(board, markedMatrix = [], spawn = false) {
   const boardEl = $("#board");
   boardEl.innerHTML = "";
+  const spawnAll = spawn === true;
+  const spawnSet = spawn instanceof Set ? spawn : null;
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
       const t = board[r][c];
       const tile = document.createElement("button");
       tile.className = "tile";
-      if (spawn && t >= 0) tile.classList.add("spawn");
+      const key = r + "," + c;
+      if (t >= 0 && (spawnAll || (spawnSet && spawnSet.has(key)))) {
+        tile.classList.add("spawn");
+        tile.style.animationDelay = (r * 0.04) + "s";
+        tile.style.animationDuration = (0.42 + r * 0.015) + "s";
+      }
       if (selected && selected.r === r && selected.c === c) tile.classList.add("selected");
       if (markedMatrix[r] && markedMatrix[r][c]) tile.classList.add("matched");
       tile.dataset.r = String(r);

@@ -144,13 +144,13 @@ export class GameEngine {
     if (!this.canSwap(a, b)) return { swapped: false };
     this.busy = true;
     this.swapCells(a, b);
-    this.cb.onSwap?.(a, b, cloneBoard(this.board));
+    await this.cb.onSwap?.(a, b, cloneBoard(this.board));
 
     const { any } = findMatches(this.board);
     if (!any) {
-      await delay(180);
+      await delay(120);
       this.swapCells(a, b);
-      this.cb.onSwapBack?.(a, b, cloneBoard(this.board));
+      await this.cb.onSwapBack?.(a, b, cloneBoard(this.board));
       this.busy = false;
       return { swapped: false };
     }
