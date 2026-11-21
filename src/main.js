@@ -454,12 +454,15 @@ function showEndModal(snap) {
   starsEl.innerHTML = [1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("");
 
   $("#modalTitle").textContent = won ? "Уровень пройден!" : "Ходы закончились";
+  const gained = won ? Math.max(0, stars - prevStars) : 0;
+  const starWord = stars === 1 ? "звезду" : (stars >= 2 && stars <= 4) ? "звезды" : "звёзд";
   $("#modalText").textContent = won
-    ? `«${level.title}» завершён. ${stars > prevStars ? "Новый рекорд звёзд!" : "Сад становится светлее."}`
+    ? `«${level.title}» завершён. ${gained > 0 ? `Отлично! Вы заработали ${stars} ${starWord}!` : `Вы набрали ${stars} ${starWord} за этот уровень.`}`
     : `Не хватило немного магии. Попробуй ещё раз — цель: ${engine.goalProgress().text.toLowerCase()}.`;
 
-  const gained = won ? Math.max(0, stars - prevStars) : 0;
-  $("#modalReward").textContent = won ? `Счёт: ${snap.score} · Звёзд получено: +${gained}` : `Счёт: ${snap.score}`;
+  $("#modalReward").textContent = won
+    ? `Счёт: ${snap.score} · Звёзды за уровень: ${stars}/3${gained > 0 ? ` (+${gained})` : ""}`
+    : `Счёт: ${snap.score}`;
 
   const actions = $("#modalActions");
   actions.innerHTML = "";
