@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Сказочный Сад — 3 в ряд</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="bg-orbs" aria-hidden="true">
+      <span class="orb orb-a"></span>
+      <span class="orb orb-b"></span>
+      <span class="orb orb-c"></span>
+    </div>
+
+    <header class="topbar">
+      <div class="brand" id="homeBtn" role="button" tabindex="0" aria-label="На главную">
+        <span class="brand-icon">✦</span>
+        <div>
+          <div class="brand-title">Сказочный Сад</div>
+          <div class="brand-sub">история в трёх рядах</div>
+        </div>
+      </div>
+      <div class="topbar-stats">
+        <div class="pill" title="Звёзды">
+          <span class="pill-icon">★</span>
+          <span id="starBank">0</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="screen-wrap">
+      <!-- MAP / STORY SCREEN -->
+      <section id="screen-map" class="screen active">
+        <div class="panel hero-panel">
+          <div class="hero-copy">
+            <p class="eyebrow">Сказочная долина</p>
+            <h1>Верни свет в Сад Чудес</h1>
+            <p class="hero-text" id="storyIntro">
+              Туман Серых Шёпотов укрыл волшебный сад. Проходи уровни 3 в ряд, собирай звёзды и возвращай саду жизнь.
+            </p>
+          </div>
+          <div class="hero-progress">
+            <div class="progress-card">
+              <div class="progress-label">Прогресс истории</div>
+              <div class="progress-bar"><div class="progress-fill" id="storyProgressFill"></div></div>
+              <div class="progress-meta"><span id="storyProgressText">0%</span><span id="levelProgressText">0/0 уровней</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="map-layout">
+          <div class="panel map-panel">
+            <div class="panel-head">
+              <h2>Карта приключения</h2>
+              <div class="muted">Выбирай уровень</div>
+            </div>
+            <div id="levelMap" class="level-map"></div>
+          </div>
+
+          <div class="panel world-panel">
+            <div class="panel-head">
+              <h2>Сад Чудес</h2>
+              <div class="muted">Трать звёзды на волшебство</div>
+            </div>
+            <div class="world-scene" id="worldScene">
+              <div class="world-ground"></div>
+              <div class="world-items" id="worldItems"></div>
+              <div class="world-mist" id="worldMist"></div>
+            </div>
+            <div id="upgradeList" class="upgrade-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GAME SCREEN -->
+      <section id="screen-game" class="screen">
+        <div class="game-layout">
+          <div class="panel game-side">
+            <button class="btn btn-ghost back-btn" id="backToMapBtn">← К карте</button>
+            <div class="level-badge">Уровень <span id="gameLevelNum">1</span></div>
+            <h2 id="gameLevelTitle" class="game-title">Название</h2>
+            <p id="gameLevelStory" class="game-story"></p>
+
+            <div class="goal-box">
+              <div class="goal-label">Цель</div>
+              <div id="goalText" class="goal-text"></div>
+              <div class="goal-progress-bar"><div id="goalProgressFill" class="goal-progress-fill"></div></div>
+              <div class="goal-meta"><span id="goalProgressText">0 / 0</span><span id="movesText">0 ходов</span></div>
+            </div>
+
+            <div class="score-box">
+              <div class="score-row"><span>Счёт</span><strong id="scoreText">0</strong></div>
+              <div class="score-row"><span>Цель счёта</span><span id="targetScoreText">0</span></div>
+              <div class="stars-row" id="starsRow">
+                <span class="star-slot">★</span><span class="star-slot">★</span><span class="star-slot">★</span>
+              </div>
+            </div>
+
+            <div class="game-actions">
+              <button class="btn btn-primary" id="restartBtn">Начать заново</button>
+            </div>
+          </div>
+
+          <div class="panel board-panel">
+            <div class="board-wrap">
+              <div id="board" class="board" aria-label="Игровое поле"></div>
+              <div id="boardOverlay" class="board-overlay hidden"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="modal" class="modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-card">
+        <div class="modal-stars" id="modalStars"></div>
+        <h2 id="modalTitle"></h2>
+        <p id="modalText" class="modal-text"></p>
+        <div id="modalReward" class="modal-reward"></div>
+        <div class="modal-actions" id="modalActions"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
