@@ -263,8 +263,8 @@ button:disabled { opacity: 0.5; cursor: default; }
 .tile.empty { visibility: hidden; pointer-events: none; }
 .tile.spawn { animation: tileIn 0.42s cubic-bezier(.16,1,.3,1) backwards; }
 @keyframes tileIn { 0%{ transform: translateY(-42px) scale(0.72); opacity: 0; } 70%{ transform: translateY(2px) scale(1.03); opacity: 1; } 100%{ transform: translateY(0) scale(1); opacity: 1; } }
-.board.shake { animation: boardShake 0.32s ease; }
-@keyframes boardShake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-4px)} 40%{transform:translateX(4px)} 60%{transform:translateX(-3px)} 80%{transform:translateX(3px)} }
+.board.shake { animation: boardShake 0.22s ease; }
+@keyframes boardShake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-1.5px,0)} 50%{transform:translate(1.5px,0)} 75%{transform:translate(-1px,0)} }
 .tile.swap-back { animation: swapBack 0.25s ease; }
 @keyframes swapBack { 0%,100%{ transform: translateX(0); } 25%{ transform: translateX(-4px); } 75%{ transform: translateX(4px); } }
 .tile .gem { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15)); pointer-events: none; }
@@ -342,17 +342,40 @@ button:disabled { opacity: 0.5; cursor: default; }
   .board-panel { order: 1; }
 }
 @media (max-width: 720px) {
-  #app { padding: 14px 14px 32px; }
-  .topbar { padding: 12px 14px; }
+  #app { padding: 10px 10px 20px; }
+  .topbar { padding: 10px 12px; margin-bottom: 12px; }
   .brand-title { font-size: 1.2rem; }
   .hero-panel { grid-template-columns: 1fr; padding: 22px; }
   .panel-head { padding: 18px 16px 0; }
   .level-map, .upgrade-list { padding-left: 16px; padding-right: 16px; }
   .world-scene { margin-left: 16px; margin-right: 16px; height: 200px; }
-  .game-side, .board-panel { padding: 18px; }
-  .board-wrap { width: 100%; }
-  .tile { border-radius: 12px; font-size: clamp(1.2rem, 5.5vw, 1.8rem); }
-  .board { gap: 5px; }
+
+  #screen-game.active { min-height: calc(100svh - 90px); }
+  .game-layout { gap: 8px; display: flex; flex-direction: column; }
+  .game-side { padding: 12px; gap: 8px; order: 2; display: grid; grid-template-columns: 1fr 1fr; align-items: start; }
+  .game-side .back-btn,
+  .game-side .level-badge,
+  .game-side .game-title,
+  .game-side .game-actions { grid-column: 1 / -1; }
+  .game-side .back-btn { padding: 7px 10px; font-size: 0.82rem; justify-self: start; }
+  .level-badge { font-size: 0.68rem; padding: 4px 10px; }
+  .game-title { font-size: 1.15rem; margin: 0; }
+  .game-story { display: none; }
+  .goal-box, .score-box { padding: 10px; border-radius: 12px; margin: 0; }
+  .goal-label { font-size: 0.65rem; margin-bottom: 4px; }
+  .goal-text { font-size: 0.84rem; margin-bottom: 6px; line-height: 1.25; }
+  .goal-progress-bar { height: 8px; }
+  .goal-meta { font-size: 0.75rem; margin-top: 5px; }
+  .score-row { font-size: 0.82rem; padding: 2px 0; }
+  .score-row strong { font-size: 1.05rem; }
+  .stars-row { font-size: 1.25rem; margin-top: 4px; gap: 4px; }
+  .game-actions { margin-top: 0; }
+  .game-actions .btn-primary { padding: 10px 14px; font-size: 0.9rem; }
+
+  .board-panel { padding: 6px; order: 1; min-height: 0; flex: 1; display: flex; align-items: center; justify-content: center; }
+  .board-wrap { width: min(100%, calc(100dvh - 280px), calc(100vw - 20px)); max-width: 560px; padding: 8px; border-radius: 22px; }
+  .board { gap: 4px; }
+  .tile { border-radius: 10px; font-size: clamp(1.2rem, 5.8vw, 2rem); }
 }
 @media (max-width: 420px) {
   .brand-sub { display: none; }

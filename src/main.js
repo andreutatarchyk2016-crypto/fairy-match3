@@ -291,7 +291,7 @@ function startLevel(levelId) {
       spawnSparks(marked);
       if (combo > 1) {
         spawnFloatText(`Комбо x${combo}!`, { x: 50, y: 42, combo: true });
-        shakeBoard();
+        if (combo >= 3) shakeBoard();
       }
       spawnFloatText(`+${gain}`, { x: 50 + (Math.random()*18-9), y: 52 + (Math.random()*10-5) });
       updateHUD();
