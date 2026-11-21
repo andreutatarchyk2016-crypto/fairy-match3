@@ -82,40 +82,37 @@
 
       <!-- GAME SCREEN -->
       <section id="screen-game" class="screen">
-        <div class="game-layout">
-          <div class="panel game-side">
-            <button class="btn btn-ghost back-btn" id="backToMapBtn">← К карте</button>
-            <div class="level-badge">Уровень <span id="gameLevelNum">1</span></div>
-            <h2 id="gameLevelTitle" class="game-title">Название</h2>
-            <p id="gameLevelStory" class="game-story"></p>
-
-            <div class="goal-box">
-              <div class="goal-label">Цель</div>
-              <div id="goalText" class="goal-text"></div>
-              <div class="goal-progress-bar"><div id="goalProgressFill" class="goal-progress-fill"></div></div>
-              <div class="goal-meta"><span id="goalProgressText">0 / 0</span><span id="movesText">0 ходов</span></div>
+        <div class="game-full">
+          <div class="game-hud">
+            <button class="hud-btn" id="backToMapBtn" aria-label="К карте">←</button>
+            <div class="hud-center">
+              <div class="hud-level">Ур. <span id="gameLevelNum">1</span> · <span id="gameLevelTitle">Название</span></div>
+              <div class="hud-goal" id="goalText">Цель</div>
+              <div class="hud-progress"><div class="hud-progress-fill" id="goalProgressFill"></div></div>
             </div>
-
-            <div class="score-box">
-              <div class="score-row"><span>Счёт</span><strong id="scoreText">0</strong></div>
-              <div class="score-row"><span>Цель счёта</span><span id="targetScoreText">0</span></div>
-              <div class="stars-row" id="starsRow">
-                <span class="star-slot">★</span><span class="star-slot">★</span><span class="star-slot">★</span>
-              </div>
-            </div>
-
-            <div class="game-actions">
-              <button class="btn btn-primary" id="restartBtn">Начать заново</button>
+            <div class="hud-right">
+              <div class="hud-chip"><span class="hud-chip-label">Ходы</span><strong id="movesText">0</strong></div>
+              <div class="hud-chip"><span class="hud-chip-label">Счёт</span><strong id="scoreText">0</strong></div>
             </div>
           </div>
 
-          <div class="panel board-panel">
+          <div class="game-stage">
             <div class="board-wrap">
               <div id="board" class="board" aria-label="Игровое поле"></div>
               <div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
               <div id="boardOverlay" class="board-overlay hidden"></div>
             </div>
           </div>
+
+          <div class="game-bottom">
+            <div class="stars-row" id="starsRow">
+              <span class="star-slot">★</span><span class="star-slot">★</span><span class="star-slot">★</span>
+            </div>
+            <div class="hud-meta"><span id="goalProgressText">0 / 0</span><span id="targetScoreText" class="hidden-target"></span></div>
+            <button class="hud-btn hud-btn-restart" id="restartBtn" aria-label="Начать заново">↻</button>
+          </div>
+
+          <p id="gameLevelStory" class="sr-only"></p>
         </div>
       </section>
     </main>

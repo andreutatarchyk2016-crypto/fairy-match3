@@ -208,7 +208,7 @@ function renderMap() {
       <div class="level-stars">${[1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("")}</div>
       ${unlocked ? "" : '<div class="level-lock">🔒</div>'}
     `;
-    btn.addEventListener("click", () => { ensureAudio(); startLevel(level.id); });
+    btn.addEventListener("click", () => { ensureAudio(); showLevelBrief(level.id); });
     map.appendChild(btn);
   }
 
@@ -405,6 +405,32 @@ async function onTileClick(e) {
 }
 
 // ---------- Modal ----------
+function showLevelBrief(levelId) {
+  const level = LEVELS.find((l) => l.id === levelId);
+  if (!level) return;
+  const stars = state.starsEarned[levelId] || 0;
+  const goal = level.goal.type === "score"
+    ? `Набрать ${level.goal.target} очков`
+    : `Собрать ${TILE_TYPES[level.goal.tile].gem} ${TILE_TYPES[level.goal.tile].name}: ${level.goal.target}`;
+  $("#confetti").innerHTML = "";
+  $("#modalStars").innerHTML = [1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("");
+  $("#modalTitle").textContent = `Уровень ${level.id}: ${level.title}`;
+  $("#modalText").textContent = level.story;
+  $("#modalReward").innerHTML = `<div style="color:var(--text);font-size:0.98rem;line-height:1.5"><strong style="color:var(--gold)">Цель:</strong> ${goal}<br><span style="color:var(--muted)">Ходов: ${level.moves}</span></div>`;
+  const actions = $("#modalActions");
+  actions.innerHTML = "";
+  const backBtn = document.createElement("button");
+  backBtn.className = "btn btn-secondary";
+  backBtn.textContent = "Назад";
+  backBtn.addEventListener("click", hideModal);
+  const startBtn = document.createElement("button");
+  startBtn.className = "btn btn-primary";
+  startBtn.textContent = "Начать";
+  startBtn.addEventListener("click", () => { hideModal(); startLevel(level.id); });
+  actions.append(backBtn, startBtn);
+  $("#modal").classList.remove("hidden");
+}
+
 function showEndModal(snap) {
   if (!engine || engine.level.id !== currentLevelId) return;
   if (!$("#screen-game").classList.contains("active")) return;
