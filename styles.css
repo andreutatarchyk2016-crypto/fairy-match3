@@ -609,12 +609,12 @@ body:has(#screen-home.active) #app { padding: 0; max-width: none; }
 @media (max-width: 560px) {
   .home-stage { justify-content: flex-start; gap: 20px; padding-top: 40px; }
   .home-title-wrap { margin-top: 0; }
-  .menu-buttons { margin-top: auto; flex-direction: column; align-items: center; gap: 14px; width: 100%; }
-  .menu-btn { width: min(320px, 84vw); }
-  .menu-btn-secondary { padding: 15px 24px; font-size: 1.05rem; }
-  .menu-btn-primary { order: -1; padding: 18px 40px; font-size: 1.3rem; transform: none; }
-  .menu-btn-primary:hover { transform: scale(1.03); }
-  .heroine-layer { width: min(52vw, 240px); left: -8px; bottom: 115px; z-index: 4; }
+  .menu-buttons { margin-top: auto; flex-direction: row; flex-wrap: nowrap; align-items: center; gap: 8px; width: 100%; padding-left: 8px; padding-right: 8px; }
+  .menu-btn { width: auto; flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; }
+  .menu-btn-secondary { flex: 1 1 0; padding: 14px 4px; font-size: clamp(0.72rem, 3.3vw, 0.95rem); letter-spacing: 0; border-radius: 10px; }
+  .menu-btn-primary { flex: 1.2 1 0; padding: 16px 6px; font-size: clamp(0.9rem, 4vw, 1.15rem); letter-spacing: 0; transform: translateY(-6px); }
+  .menu-btn-primary:hover { transform: translateY(-8px) scale(1.03); }
+  .heroine-layer { width: min(52vw, 240px); left: -8px; bottom: 150px; z-index: 4; }
   .heroine-speech { left: 60%; top: 10%; max-width: 150px; font-size: 0.78rem; padding: 8px 10px; }
 }
 
