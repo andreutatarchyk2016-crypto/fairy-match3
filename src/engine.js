@@ -249,14 +249,9 @@ export class GameEngine {
 
   checkEnd() {
     const goal = this.goalProgress();
-    if (goal.done) {
-      this.won = true;
-      this.over = true;
-      return;
-    }
     if (this.movesLeft <= 0) {
       this.over = true;
-      this.won = false;
+      this.won = goal.done;
     }
   }
 

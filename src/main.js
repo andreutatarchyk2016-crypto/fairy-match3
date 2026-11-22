@@ -405,9 +405,10 @@ function updateHUD() {
   $("#scoreText").textContent = String(snap.score);
   $("#targetScoreText").textContent = String(s1);
   $("#movesText").textContent = `${snap.movesLeft}`;
-  $("#goalText").textContent = goal.text;
+  $("#goalText").textContent = goal.done ? `✓ ${goal.text}` : goal.text;
   const nextStar = snap.stars < 1 ? `★ ${s1}` : snap.stars < 2 ? `★★ ${s2}` : snap.stars < 3 ? `★★★ ${s3}` : "★★★ макс";
-  $("#goalProgressText").textContent = `${Math.min(goal.current, goal.target)}/${goal.target} · ${nextStar}`;
+  const prog = `${Math.min(goal.current, goal.target)}/${goal.target}`;
+  $("#goalProgressText").textContent = goal.done ? `${prog} · цель выполнена · ${nextStar}` : `${prog} · ${nextStar}`;
   const pct = Math.min(100, (goal.current / goal.target) * 100);
   $("#goalProgressFill").style.width = pct + "%";
 
@@ -502,7 +503,7 @@ function showLevelBrief(levelId) {
   $("#modalStars").innerHTML = [1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("");
   $("#modalTitle").textContent = `Уровень ${level.id}: ${level.title}`;
   $("#modalText").textContent = level.story;
-  $("#modalReward").innerHTML = `<div style="color:var(--text);font-size:0.98rem;line-height:1.6"><strong style="color:var(--gold)">Цель:</strong> ${goal}<br><span style="color:var(--muted)">Ходов: ${level.moves}</span><div style="margin-top:8px;color:var(--muted)"><strong style="color:var(--gold)">Звёзды:</strong> ★ ${s1} · ★★ ${s2} · ★★★ ${s3} очков</div></div>`;
+  $("#modalReward").innerHTML = `<div style="color:var(--text);font-size:0.98rem;line-height:1.6"><strong style="color:var(--gold)">Цель:</strong> ${goal}<br><span style="color:var(--muted)">Ходов: ${level.moves} · Выполните цель и набирайте очки для звёзд</span><div style="margin-top:8px;color:var(--muted)"><strong style="color:var(--gold)">Звёзды за очки:</strong> ★ ${s1} · ★★ ${s2} · ★★★ ${s3}</div></div>`;
   const actions = $("#modalActions");
   actions.innerHTML = "";
   const backBtn = document.createElement("button");
