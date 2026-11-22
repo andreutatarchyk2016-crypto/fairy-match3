@@ -12,11 +12,16 @@
 <body>
   <div id="app">
     <div class="forest-bg" aria-hidden="true">
-      <div class="forest-art"></div>
-      <div class="forest-mist forest-mist-a"></div>
-      <div class="forest-mist forest-mist-b"></div>
-      <div class="forest-vignette"></div>
+      <div class="forest-layer forest-sky" id="bgSky"></div>
+      <div class="forest-layer forest-art" id="bgArt"></div>
+      <div class="forest-layer forest-castle" id="bgCastle"></div>
+      <div class="forest-layer forest-mid" id="bgMid"></div>
+      <div class="forest-mist forest-mist-a" id="mistA"></div>
+      <div class="forest-mist forest-mist-b" id="mistB"></div>
+      <div class="forest-layer forest-flowers" id="bgFlowers"></div>
+      <div class="forest-layer forest-moon" id="bgMoon"></div>
       <div class="forest-fireflies" id="bgSparkles"></div>
+      <div class="forest-vignette" id="bgVignette"></div>
     </div>
 
     <header class="topbar" id="topbar">
@@ -28,6 +33,7 @@
         </div>
       </div>
       <div class="topbar-stats">
+        <button class="pill pill-btn" id="themeBtn" title="Тема" aria-label="Сменить тему">🎨</button>
         <button class="pill pill-btn" id="soundBtn" title="Звук" aria-label="Переключить звук">🔊</button>
         <div class="pill" title="Звёзды">
           <span class="pill-icon">★</span>
@@ -45,35 +51,42 @@
             <p class="home-story" id="storyIntro">Верни свет в волшебные земли. Туман Серых Шёпотов накрыл сады, лес, озеро и замок — помоги фее Люмине собрать звёзды и оживить этот мир.</p>
           </div>
 
+          <div class="home-path" aria-hidden="true">
+            <div class="home-path-glow"></div>
+            <div class="home-path-sparkles" id="homePathSparkles"></div>
+          </div>
+
           <div class="home-bottom-nav">
-            <button class="home-nav-btn" id="navForestBtn">
+            <button class="home-nav-btn home-nav-wood" id="navForestBtn">
               <span class="home-nav-icon">🌿</span>
               <span>Сказочный мир</span>
             </button>
             <button class="play-triangle" id="navPlayBtn" aria-label="В путь">
+              <span class="play-portal-ring"></span>
               <svg class="play-triangle-svg" viewBox="0 0 180 160" aria-hidden="true" focusable="false">
                 <defs>
                   <linearGradient id="playGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#fff1a6"/>
-                    <stop offset="35%" stop-color="#ffd84a"/>
-                    <stop offset="70%" stop-color="#ffb02e"/>
+                    <stop offset="0%" stop-color="#fff6b8"/>
+                    <stop offset="30%" stop-color="#ffe06a"/>
+                    <stop offset="65%" stop-color="#ffb02e"/>
                     <stop offset="100%" stop-color="#ff8a2b"/>
                   </linearGradient>
                   <linearGradient id="playShine" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+                    <stop offset="0%" stop-color="rgba(255,255,255,0.65)"/>
                     <stop offset="45%" stop-color="rgba(255,255,255,0)"/>
                   </linearGradient>
                 </defs>
-                <path d="M90 10 C90 10 94 10 98 18 L170 142 C174 150 170 154 162 154 L18 154 C10 154 6 150 10 142 L82 18 C86 10 90 10 90 10 Z" fill="url(#playGrad)" stroke="rgba(255,246,190,0.9)" stroke-width="2"/>
+                <path d="M90 10 C90 10 94 10 98 18 L170 142 C174 150 170 154 162 154 L18 154 C10 154 6 150 10 142 L82 18 C86 10 90 10 90 10 Z" fill="url(#playGrad)" stroke="rgba(255,248,210,0.95)" stroke-width="2.5"/>
                 <path d="M90 20 C90 20 93 20 96 26 L160 138 C163 144 160 146 154 146 L26 146 C20 146 17 144 20 138 L84 26 C87 20 90 20 90 20 Z" fill="url(#playShine)"/>
               </svg>
               <span class="play-triangle-text">В путь</span>
             </button>
-            <button class="home-nav-btn" id="navAchievementsBtn">
+            <button class="home-nav-btn home-nav-wood" id="navAchievementsBtn">
               <span class="home-nav-icon">🏆</span>
               <span>Достижения</span>
             </button>
           </div>
+          <button class="home-theme-btn" id="homeThemeBtn" aria-label="Сменить тему">🎨 Тема</button>
         </div>
 
         <div class="heroine-layer" id="heroineLayer">
@@ -132,6 +145,7 @@
               <div class="hud-progress"><div class="hud-progress-fill" id="goalProgressFill"></div></div>
             </div>
             <div class="hud-right">
+              <button class="hud-btn hud-hint-btn" id="hintBtn" aria-label="Подсказка феи" title="Подсказка феи">🧚</button>
               <div class="hud-chip"><span class="hud-chip-label">Ходы</span><strong id="movesText">0</strong></div>
               <div class="hud-chip"><span class="hud-chip-label">Счёт</span><strong id="scoreText">0</strong></div>
             </div>
@@ -153,6 +167,7 @@
             <button class="hud-btn hud-btn-restart" id="restartBtn" aria-label="Начать заново">↻</button>
           </div>
 
+          <div id="fairyHint" class="fairy-hint hidden" aria-live="polite"></div>
           <p id="gameLevelStory" class="sr-only"></p>
         </div>
       </section>

@@ -14,6 +14,8 @@ let selected = null; // {r,c}
 let currentLevelId = null;
 let endModalShown = false;
 let selectedGardenId = GARDENS[0].id;
+let hintMove = null;
+let hintIdleTimer = null;
 
 // ---------- Audio (simple beeps, no assets) ----------
 let audioCtx = null;
@@ -42,6 +44,103 @@ function sfxWin() { [523,659,784,1047].forEach((f,i)=>setTimeout(()=>beep(f,0.18
 function sfxLose() { [330,294,262].forEach((f,i)=>setTimeout(()=>beep(f,0.2,"triangle",0.03), i*130)); }
 function sfxBuy() { [660,880].forEach((f,i)=>setTimeout(()=>beep(f,0.12,"sine",0.035), i*80)); }
 
+// ---------- Theme / progression / parallax ----------
+const THEMES = ["default", "night", "autumn", "winter"];
+function applyTheme() {
+  const t = THEMES.includes(state.theme) ? state.theme : "default";
+  state.theme = t;
+  document.body.dataset.theme = t;
+  const labels = { default: "🎨 Тема", night: "🌙 Ночь", autumn: "🍂 Осень", winter: "❄️ Зима" };
+  const label = labels[t] || labels.default;
+  const hb = $("#homeThemeBtn"); if (hb) hb.textContent = label;
+  const tb = $("#themeBtn"); if (tb) tb.title = `Тема: ${label}`;
+}
+function cycleTheme() {
+  ensureAudio();
+  const idx = THEMES.indexOf(state.theme);
+  state.theme = THEMES[(idx + 1) % THEMES.length];
+  saveState(state);
+  applyTheme();
+}
+
+function applyWorldProgression() {
+  const builtSet = new Set(state.upgradesBuilt);
+  const g1 = GARDENS[0].upgrades.filter(u => builtSet.has(u.id)).length / GARDENS[0].upgrades.length;
+  const g2 = GARDENS[1].upgrades.filter(u => builtSet.has(u.id)).length / GARDENS[1].upgrades.length;
+  const g3 = GARDENS[2].upgrades.filter(u => builtSet.has(u.id)).length / GARDENS[2].upgrades.length;
+  const g4 = GARDENS[3].upgrades.filter(u => builtSet.has(u.id)).length / GARDENS[3].upgrades.length;
+  const total = (g1 + g2 + g3 + g4) / 4;
+  const root = document.querySelector(".forest-bg");
+  if (root) {
+    root.style.setProperty("--mist-o", String(Math.max(0.08, 0.62 - total * 0.5)));
+    root.style.setProperty("--world-glow", String(total));
+    root.style.setProperty("--flowers-o", String(Math.min(1, g1 * 1.1)));
+    root.style.setProperty("--moon-o", String(Math.min(1, g3 * 1.1)));
+    root.style.setProperty("--castle-o", String(Math.min(1, g4 * 1.1)));
+  }
+  const sparkWrap = $("#bgSparkles");
+  if (sparkWrap) {
+    const want = Math.round(24 + total * 30 + g2 * 18);
+    const cur = sparkWrap.childElementCount;
+    if (cur < want) {
+      for (let i = cur; i < want; i++) {
+        const s = document.createElement("span");
+        s.className = "bg-sparkle";
+        s.style.left = Math.random() * 100 + "%";
+        s.style.top = (18 + Math.random() * 78) + "%";
+        s.style.setProperty("--dur", (2.4 + Math.random() * 3.8).toFixed(2) + "s");
+        s.style.setProperty("--drift", (6 + Math.random() * 8).toFixed(2) + "s");
+        s.style.setProperty("--delay", (-Math.random() * 5).toFixed(2) + "s");
+        const size = 2 + Math.random() * 5;
+        s.style.width = size + "px"; s.style.height = size + "px";
+        sparkWrap.appendChild(s);
+      }
+    }
+  }
+}
+
+function initParallax() {
+  const layers = [
+    { el: $("#bgSky"), k: 0.012 },
+    { el: $("#bgArt"), k: 0.02 },
+    { el: $("#bgCastle"), k: 0.028 },
+    { el: $("#bgMid"), k: 0.016 },
+    { el: $("#mistA"), k: 0.035 },
+    { el: $("#mistB"), k: 0.025 },
+    { el: $("#bgFlowers"), k: 0.04 },
+    { el: $("#bgMoon"), k: 0.01 },
+  ].filter(x => x.el);
+  let raf = 0, tx = 0, ty = 0;
+  const apply = () => {
+    raf = 0;
+    for (const { el, k } of layers) {
+      el.style.translate = `${tx * k}px ${ty * k}px`;
+    }
+  };
+  window.addEventListener("pointermove", (e) => {
+    tx = (e.clientX / window.innerWidth - 0.5) * 40;
+    ty = (e.clientY / window.innerHeight - 0.5) * 24;
+    if (!raf) raf = requestAnimationFrame(apply);
+  }, { passive: true });
+}
+
+function initHomePathSparkles() {
+  const wrap = $("#homePathSparkles");
+  if (!wrap) return;
+  wrap.innerHTML = "";
+  for (let i = 0; i < 14; i++) {
+    const s = document.createElement("span");
+    s.className = "path-sparkle";
+    s.style.left = (30 + Math.random() * 40) + "%";
+    s.style.top = (10 + Math.random() * 80) + "%";
+    s.style.setProperty("--pd", (2.2 + Math.random() * 2.6).toFixed(2) + "s");
+    s.style.animationDelay = (-Math.random() * 3).toFixed(2) + "s";
+    const size = 2 + Math.random() * 3;
+    s.style.width = size + "px"; s.style.height = size + "px";
+    wrap.appendChild(s);
+  }
+}
+
 // ---------- Navigation ----------
 function showScreen(name) {
   $$(".screen").forEach((s) => s.classList.remove("active"));
@@ -59,6 +158,8 @@ $("#soundBtn").addEventListener("click", () => {
   $("#soundBtn").textContent = soundEnabled ? "🔊" : "🔇";
   if (soundEnabled) ensureAudio();
 });
+$("#themeBtn")?.addEventListener("click", cycleTheme);
+$("#homeThemeBtn")?.addEventListener("click", cycleTheme);
 
 function nextPlayableLevel() {
   for (const level of LEVELS) {
@@ -291,6 +392,7 @@ function renderMap() {
   }
 
   renderWorld();
+  applyWorldProgression();
 }
 
 function renderWorld() {
@@ -368,6 +470,55 @@ function renderWorld() {
   }
 }
 
+// ---------- Fairy hint ----------
+function findValidMove(board) {
+  const size = board.length;
+  function hasMatch(b) {
+    for (let r = 0; r < size; r++) for (let c = 0; c < size - 2; c++) { const v = b[r][c]; if (v >= 0 && v === b[r][c+1] && v === b[r][c+2]) return true; }
+    for (let c = 0; c < size; c++) for (let r = 0; r < size - 2; r++) { const v = b[r][c]; if (v >= 0 && v === b[r+1][c] && v === b[r+2][c]) return true; }
+    return false;
+  }
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+    for (const [dr,dc] of [[1,0],[0,1]]) {
+      const nr = r+dr, nc = c+dc; if (nr>=size||nc>=size) continue;
+      const b = board.map(row => row.slice());
+      [b[r][c], b[nr][nc]] = [b[nr][nc], b[r][c]];
+      if (hasMatch(b)) return { a:{r,c}, b:{r:nr,c:nc} };
+    }
+  }
+  return null;
+}
+function clearHint() {
+  hintMove = null;
+  $("#fairyHint")?.classList.add("hidden");
+  $$(".tile.hint-from, .tile.hint-to").forEach(el => el.classList.remove("hint-from","hint-to"));
+}
+function showFairyHint(msg) {
+  if (!engine || engine.busy || engine.over) return;
+  const move = findValidMove(engine.board);
+  hintMove = move;
+  renderBoard(engine.board, []);
+  if (move) {
+    tileEl(move.a.r, move.a.c)?.classList.add("hint-from");
+    tileEl(move.b.r, move.b.c)?.classList.add("hint-to");
+  }
+  const hint = $("#fairyHint");
+  if (hint) {
+    hint.textContent = msg || (move ? "Люмина подсказывает: попробуй этот ход ✨" : "Люмина: ходов не видно — попробуй перезапустить уровень.");
+    hint.classList.remove("hidden");
+    setTimeout(() => { if (hint.textContent === hint.textContent) hint.classList.add("hidden"); }, 3500);
+  }
+}
+function scheduleIdleHint() {
+  clearTimeout(hintIdleTimer);
+  if (!engine || engine.over) return;
+  hintIdleTimer = setTimeout(() => {
+    if (!engine || engine.over || engine.busy) return;
+    showFairyHint("Люмина: вижу хороший ход! Попробуй подсвеченные фишки ✨");
+  }, 12000);
+}
+$("#hintBtn")?.addEventListener("click", () => { ensureAudio(); showFairyHint("Люмина подсказывает: попробуй этот ход ✨"); });
+
 // ---------- Game ----------
 function startLevel(levelId) {
   const level = LEVELS.find((l) => l.id === levelId);
@@ -375,6 +526,7 @@ function startLevel(levelId) {
   currentLevelId = levelId;
   selected = null;
   endModalShown = false;
+  clearHint();
   hideModal();
   engine = new GameEngine(level, {
     onSwap: async (a, b) => {
@@ -414,6 +566,7 @@ function startLevel(levelId) {
   updateHUD();
   renderBoard(engine.board, [], true);
   showScreen("game");
+  scheduleIdleHint();
 }
 
 function updateHUD() {
@@ -479,6 +632,8 @@ function renderBoard(board, markedMatrix = [], spawn = false) {
 
 async function onTileClick(e) {
   ensureAudio();
+  clearHint();
+  clearTimeout(hintIdleTimer);
   if (!engine || engine.busy || engine.over) return;
   const tile = e.currentTarget;
   const r = Number(tile.dataset.r);
@@ -507,6 +662,7 @@ async function onTileClick(e) {
     selected = { r, c };
     renderBoard(engine.board, []);
   }
+  scheduleIdleHint();
 }
 
 // ---------- Modal ----------
@@ -540,6 +696,8 @@ function showLevelBrief(levelId) {
 function showEndModal(snap) {
   if (!engine || engine.level.id !== currentLevelId) return;
   if (!$("#screen-game").classList.contains("active")) return;
+  clearHint();
+  clearTimeout(hintIdleTimer);
   const level = engine.level;
   const won = snap.won;
   const stars = won ? engine.starsForScore(snap.score) : 0;
@@ -612,5 +770,9 @@ $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") { /*
 
 // ---------- Init ----------
 initSparkles();
+initHomePathSparkles();
+initParallax();
+applyTheme();
 renderMap();
+applyWorldProgression();
 showScreen("home");

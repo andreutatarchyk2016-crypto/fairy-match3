@@ -5,6 +5,7 @@ function defaultState() {
     starsEarned: {},      // levelId -> 0..3
     upgradesBuilt: [],    // upgrade ids
     selectedLevel: 1,
+    theme: "default",     // default | night | autumn | winter
   };
 }
 
