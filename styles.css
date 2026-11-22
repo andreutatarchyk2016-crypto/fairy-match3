@@ -30,68 +30,84 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 button:disabled { opacity: 0.5; cursor: default; }
 
 /* ===== Animated forest background ===== */
-.forest-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #132417; }
+.forest-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #141f18; }
 .forest-sky {
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 70% 45% at 50% 20%, rgba(255, 236, 170, 0.18), transparent 60%),
-    radial-gradient(ellipse 40% 30% at 20% 15%, rgba(126, 232, 199, 0.12), transparent 60%),
-    radial-gradient(ellipse 45% 35% at 80% 25%, rgba(255, 190, 120, 0.12), transparent 60%),
-    linear-gradient(180deg, #244a35 0%, #1a3528 28%, #142a1d 55%, #0f2016 100%);
+    radial-gradient(ellipse 90% 55% at 50% 0%, rgba(170, 200, 120, 0.18), transparent 62%),
+    radial-gradient(ellipse 55% 35% at 25% 20%, rgba(120, 170, 90, 0.12), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 78% 18%, rgba(210, 190, 90, 0.10), transparent 60%),
+    linear-gradient(180deg, #3a4f35 0%, #2f432e 22%, #243526 45%, #182419 72%, #101810 100%);
 }
+/* soft canopy light rays */
+.forest-sky::after {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 20% 60% at 30% 0%, rgba(255, 245, 180, 0.08), transparent 70%),
+    radial-gradient(ellipse 18% 55% at 65% 0%, rgba(255, 240, 160, 0.06), transparent 70%);
+  animation: glowPulse 10s ease-in-out infinite alternate;
+}
+
 .forest-mist {
-  position: absolute; left: -10%; width: 130%; height: 45%; border-radius: 50%;
-  filter: blur(18px); opacity: 0.55;
+  position: absolute; left: -10%; width: 130%; border-radius: 50%;
+  filter: blur(26px); opacity: 0.45;
 }
 .forest-mist-a {
-  bottom: 12%; background: radial-gradient(ellipse at center, rgba(190, 230, 200, 0.28), rgba(140,190,160,0.05) 60%, transparent 72%);
-  animation: mistDrift 18s ease-in-out infinite alternate;
+  bottom: 18%; height: 34%;
+  background: radial-gradient(ellipse at center, rgba(160, 185, 120, 0.22), rgba(120,150,90,0.04) 60%, transparent 74%);
+  animation: mistDrift 22s ease-in-out infinite alternate;
 }
 .forest-mist-b {
-  bottom: 28%; height: 35%; background: radial-gradient(ellipse at center, rgba(255, 235, 190, 0.12), rgba(160,210,180,0.04) 55%, transparent 72%);
-  animation: mistDrift 24s ease-in-out infinite alternate-reverse;
+  bottom: 5%; height: 28%;
+  background: radial-gradient(ellipse at center, rgba(210, 210, 140, 0.14), rgba(140,160,90,0.03) 55%, transparent 72%);
+  animation: mistDrift 30s ease-in-out infinite alternate-reverse;
 }
-@keyframes mistDrift { from { transform: translateX(-3%) scale(1); } to { transform: translateX(3%) scale(1.04); } }
+@keyframes mistDrift { from { transform: translateX(-2.5%) scale(1); } to { transform: translateX(2.5%) scale(1.03); } }
 
-.forest-trees { position: absolute; left: -5%; bottom: 0; width: 120%; background-repeat: repeat-x; background-position: bottom center; }
+.forest-trees { position: absolute; left: -6%; bottom: 0; width: 130%; background-repeat: repeat-x; background-position: bottom center; will-change: transform; }
+
+/* Far layer: soft olive canopy */
 .forest-trees-far {
-  height: 58%; opacity: 0.55;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 500' preserveAspectRatio='none'%3E%3Cpath d='M0 500 L0 320 L40 320 L70 210 L100 320 L130 320 L170 160 L210 320 L250 320 L285 230 L320 320 L360 320 L410 140 L460 320 L500 320 L540 200 L580 320 L630 320 L680 120 L730 320 L780 320 L820 220 L860 320 L910 320 L960 150 L1010 320 L1050 320 L1090 210 L1130 320 L1170 320 L1200 260 L1200 500 Z' fill='%231a3326'/%3E%3C/svg%3E");
-  background-size: 1200px 100%;
-  animation: forestParallax 60s linear infinite;
+  height: 68%; opacity: 0.5;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 600' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%235f7040'/%3E%3Cstop offset='1' stop-color='%23344028'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 600 L0 340 C40 330 60 280 90 290 C120 250 160 230 200 250 C230 210 280 200 320 230 C350 190 400 185 440 215 C470 180 520 175 560 210 C600 170 660 170 700 210 C740 180 790 185 830 220 C870 190 920 200 950 235 C990 210 1040 220 1070 250 C1110 220 1160 230 1190 265 C1230 235 1280 245 1320 280 C1350 260 1380 270 1400 290 L1400 600 Z' fill='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 1400px 100%;
+  animation: forestParallax 90s linear infinite;
 }
+/* Mid layer: darker trees */
 .forest-trees-mid {
-  height: 52%; opacity: 0.78;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 500' preserveAspectRatio='none'%3E%3Cpath d='M0 500 L0 340 L30 340 L75 180 L120 340 L165 340 L210 130 L255 340 L300 340 L355 190 L410 340 L450 340 L510 110 L570 340 L620 340 L665 200 L710 340 L760 340 L820 120 L880 340 L930 340 L975 210 L1020 340 L1070 340 L1130 140 L1190 340 L1200 340 L1200 500 Z' fill='%2313271c'/%3E%3C/svg%3E");
-  background-size: 1000px 100%;
+  height: 60%; opacity: 0.72;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 600' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%233a4d2d'/%3E%3Cstop offset='1' stop-color='%231e2c19'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 600 L0 360 C30 350 45 300 70 310 C90 260 130 240 170 260 C190 210 230 190 270 220 C300 170 350 160 390 200 C420 150 470 145 510 185 C540 140 590 135 630 175 C670 130 730 130 770 175 C810 140 860 150 900 190 C940 150 990 160 1020 195 C1060 160 1110 170 1140 205 C1180 170 1230 180 1260 215 C1300 185 1350 200 1400 230 L1400 600 Z' fill='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 1200px 100%;
+  animation: forestParallax 65s linear infinite;
+}
+/* Near layer: deep dark silhouette/foliage */
+.forest-trees-near {
+  height: 52%; opacity: 0.92;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 600' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23223318'/%3E%3Cstop offset='1' stop-color='%230f190d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 600 L0 380 C25 370 35 320 60 330 C80 280 120 255 155 280 C175 230 220 210 260 240 C285 190 330 180 370 220 C400 170 450 165 490 205 C520 155 570 150 610 195 C650 145 710 145 750 190 C790 150 840 160 880 200 C920 155 970 165 1005 200 C1045 165 1095 175 1130 210 C1170 175 1220 185 1255 220 C1295 190 1350 205 1400 240 L1400 600 Z' fill='url(%23g)'/%3E%3C/svg%3E");
+  background-size: 1100px 100%;
   animation: forestParallax 45s linear infinite;
 }
-.forest-trees-near {
-  height: 44%; opacity: 0.95;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 500' preserveAspectRatio='none'%3E%3Cpath d='M0 500 L0 360 L20 360 L80 150 L140 360 L190 360 L250 100 L310 360 L360 360 L430 170 L500 360 L560 360 L640 90 L720 360 L780 360 L840 180 L900 360 L960 360 L1040 120 L1120 360 L1200 360 L1200 500 Z' fill='%230c1a12'/%3E%3C/svg%3E");
-  background-size: 900px 100%;
-  animation: forestParallax 32s linear infinite;
-}
-@keyframes forestParallax { from { background-position-x: 0; } to { background-position-x: -1200px; } }
+@keyframes forestParallax { from { transform: translateX(0); } to { transform: translateX(-1100px); } }
 
 .forest-glow {
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 55% 35% at 50% 75%, rgba(255, 214, 120, 0.14), transparent 65%),
-    radial-gradient(ellipse 30% 25% at 70% 60%, rgba(126, 232, 199, 0.1), transparent 60%);
-  animation: glowPulse 8s ease-in-out infinite alternate;
+    radial-gradient(ellipse 65% 40% at 50% 80%, rgba(200, 190, 90, 0.12), transparent 68%),
+    radial-gradient(ellipse 35% 30% at 25% 70%, rgba(140, 180, 80, 0.08), transparent 62%),
+    radial-gradient(ellipse 30% 25% at 75% 65%, rgba(160, 190, 90, 0.07), transparent 62%);
+  animation: glowPulse 9s ease-in-out infinite alternate;
 }
-@keyframes glowPulse { from { opacity: .7; } to { opacity: 1; } }
+@keyframes glowPulse { from { opacity: .65; } to { opacity: 1; } }
 
 .forest-fireflies { position: absolute; inset: 0; }
 .bg-sparkle {
   position: absolute; width: 4px; height: 4px; border-radius: 50%;
-  background: #fff7b0;
-  box-shadow: 0 0 8px 2px rgba(255,244,150,0.9), 0 0 18px 5px rgba(255,214,74,0.35);
+  background: #fff8c8;
+  box-shadow: 0 0 8px 2px rgba(255,246,170,0.85), 0 0 18px 5px rgba(220,210,90,0.28);
   animation: twinkle var(--dur, 3s) ease-in-out infinite, fireflyDrift var(--drift, 8s) ease-in-out infinite alternate;
   animation-delay: var(--delay, 0s);
 }
-@keyframes twinkle { 0%,100%{ opacity: 0.1; transform: scale(0.5); } 50%{ opacity: 1; transform: scale(1.25); } }
+@keyframes twinkle { 0%,100%{ opacity: 0.08; transform: scale(0.45); } 50%{ opacity: 0.95; transform: scale(1.2); } }
 @keyframes fireflyDrift { from { margin-left: 0; margin-top: 0; } to { margin-left: 12px; margin-top: -10px; } }
 
 #app { position: relative; z-index: 1; max-width: 1360px; margin: 0 auto; padding: 20px 20px 40px; }
