@@ -30,74 +30,42 @@ button { font: inherit; color: inherit; background: none; border: none; cursor: 
 button:disabled { opacity: 0.5; cursor: default; }
 
 /* ===== Animated forest background ===== */
-.forest-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #141f18; }
-.forest-sky {
-  position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 90% 55% at 50% 0%, rgba(170, 200, 120, 0.18), transparent 62%),
-    radial-gradient(ellipse 55% 35% at 25% 20%, rgba(120, 170, 90, 0.12), transparent 60%),
-    radial-gradient(ellipse 45% 35% at 78% 18%, rgba(210, 190, 90, 0.10), transparent 60%),
-    linear-gradient(180deg, #3a4f35 0%, #2f432e 22%, #243526 45%, #182419 72%, #101810 100%);
+.forest-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; background: #172316; }
+.forest-art {
+  position: absolute; inset: -2%;
+  background: url("./assets/forest-bg.webp") center bottom / cover no-repeat;
+  filter: saturate(1.05) brightness(0.92) contrast(1.04);
+  transform: scale(1.03);
+  animation: forestBreathe 24s ease-in-out infinite alternate;
+  will-change: transform;
 }
-/* soft canopy light rays */
-.forest-sky::after {
-  content: ""; position: absolute; inset: 0;
-  background:
-    radial-gradient(ellipse 20% 60% at 30% 0%, rgba(255, 245, 180, 0.08), transparent 70%),
-    radial-gradient(ellipse 18% 55% at 65% 0%, rgba(255, 240, 160, 0.06), transparent 70%);
-  animation: glowPulse 10s ease-in-out infinite alternate;
+@keyframes forestBreathe {
+  from { transform: scale(1.03) translate3d(0, 0, 0); }
+  to   { transform: scale(1.07) translate3d(-1.2%, -0.8%, 0); }
 }
 
 .forest-mist {
   position: absolute; left: -10%; width: 130%; border-radius: 50%;
-  filter: blur(26px); opacity: 0.45;
+  filter: blur(22px);
 }
 .forest-mist-a {
-  bottom: 18%; height: 34%;
-  background: radial-gradient(ellipse at center, rgba(160, 185, 120, 0.22), rgba(120,150,90,0.04) 60%, transparent 74%);
-  animation: mistDrift 22s ease-in-out infinite alternate;
+  bottom: 14%; height: 30%; opacity: 0.34;
+  background: radial-gradient(ellipse at center, rgba(210, 225, 160, 0.22), rgba(140,170,90,0.03) 58%, transparent 74%);
+  animation: mistDrift 20s ease-in-out infinite alternate;
 }
 .forest-mist-b {
-  bottom: 5%; height: 28%;
-  background: radial-gradient(ellipse at center, rgba(210, 210, 140, 0.14), rgba(140,160,90,0.03) 55%, transparent 72%);
-  animation: mistDrift 30s ease-in-out infinite alternate-reverse;
+  bottom: -2%; height: 28%; opacity: 0.28;
+  background: radial-gradient(ellipse at center, rgba(180, 205, 130, 0.18), rgba(120,150,80,0.02) 56%, transparent 74%);
+  animation: mistDrift 28s ease-in-out infinite alternate-reverse;
 }
-@keyframes mistDrift { from { transform: translateX(-2.5%) scale(1); } to { transform: translateX(2.5%) scale(1.03); } }
+@keyframes mistDrift { from { transform: translateX(-2.5%) scale(1); } to { transform: translateX(2.5%) scale(1.04); } }
 
-.forest-trees { position: absolute; left: -6%; bottom: 0; width: 130%; background-repeat: repeat-x; background-position: bottom center; will-change: transform; }
-
-/* Far layer: soft olive canopy */
-.forest-trees-far {
-  height: 68%; opacity: 0.5;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 600' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%235f7040'/%3E%3Cstop offset='1' stop-color='%23344028'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 600 L0 340 C40 330 60 280 90 290 C120 250 160 230 200 250 C230 210 280 200 320 230 C350 190 400 185 440 215 C470 180 520 175 560 210 C600 170 660 170 700 210 C740 180 790 185 830 220 C870 190 920 200 950 235 C990 210 1040 220 1070 250 C1110 220 1160 230 1190 265 C1230 235 1280 245 1320 280 C1350 260 1380 270 1400 290 L1400 600 Z' fill='url(%23g)'/%3E%3C/svg%3E");
-  background-size: 1400px 100%;
-  animation: forestParallax 90s linear infinite;
-}
-/* Mid layer: darker trees */
-.forest-trees-mid {
-  height: 60%; opacity: 0.72;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 600' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%233a4d2d'/%3E%3Cstop offset='1' stop-color='%231e2c19'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 600 L0 360 C30 350 45 300 70 310 C90 260 130 240 170 260 C190 210 230 190 270 220 C300 170 350 160 390 200 C420 150 470 145 510 185 C540 140 590 135 630 175 C670 130 730 130 770 175 C810 140 860 150 900 190 C940 150 990 160 1020 195 C1060 160 1110 170 1140 205 C1180 170 1230 180 1260 215 C1300 185 1350 200 1400 230 L1400 600 Z' fill='url(%23g)'/%3E%3C/svg%3E");
-  background-size: 1200px 100%;
-  animation: forestParallax 65s linear infinite;
-}
-/* Near layer: deep dark silhouette/foliage */
-.forest-trees-near {
-  height: 52%; opacity: 0.92;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 600' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23223318'/%3E%3Cstop offset='1' stop-color='%230f190d'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M0 600 L0 380 C25 370 35 320 60 330 C80 280 120 255 155 280 C175 230 220 210 260 240 C285 190 330 180 370 220 C400 170 450 165 490 205 C520 155 570 150 610 195 C650 145 710 145 750 190 C790 150 840 160 880 200 C920 155 970 165 1005 200 C1045 165 1095 175 1130 210 C1170 175 1220 185 1255 220 C1295 190 1350 205 1400 240 L1400 600 Z' fill='url(%23g)'/%3E%3C/svg%3E");
-  background-size: 1100px 100%;
-  animation: forestParallax 45s linear infinite;
-}
-@keyframes forestParallax { from { transform: translateX(0); } to { transform: translateX(-1100px); } }
-
-.forest-glow {
+.forest-vignette {
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 65% 40% at 50% 80%, rgba(200, 190, 90, 0.12), transparent 68%),
-    radial-gradient(ellipse 35% 30% at 25% 70%, rgba(140, 180, 80, 0.08), transparent 62%),
-    radial-gradient(ellipse 30% 25% at 75% 65%, rgba(160, 190, 90, 0.07), transparent 62%);
-  animation: glowPulse 9s ease-in-out infinite alternate;
+    radial-gradient(ellipse 85% 65% at 50% 45%, rgba(0,0,0,0) 45%, rgba(8,16,8,0.18) 100%),
+    linear-gradient(180deg, rgba(15,28,14,0.10) 0%, rgba(10,20,10,0.02) 35%, rgba(10,20,10,0.12) 100%);
 }
-@keyframes glowPulse { from { opacity: .65; } to { opacity: 1; } }
 
 .forest-fireflies { position: absolute; inset: 0; }
 .bg-sparkle {
