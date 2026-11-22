@@ -39,21 +39,46 @@
     <main class="screen-wrap">
       <!-- HOME -->
       <section id="screen-home" class="screen active">
-        <div class="home-hero">
-          <div class="home-copy">
-            <p class="eyebrow">Сказочная долина</p>
-            <h1>Верни свет<br>в волшебные земли</h1>
-            <p class="hero-text" id="storyIntro">Туман Серых Шёпотов накрыл волшебные земли. Помоги фее Люмине: проходи уровни 3 в ряд, собирай звёзды и восстанавливай сады, лес, озеро и небесный замок.</p>
-            <div class="home-actions">
-              <button class="btn btn-primary home-btn" id="navPlayBtn">В путь</button>
-              <button class="btn btn-secondary home-btn" id="navForestBtn">Сказочный мир</button>
-              <button class="btn btn-ghost home-btn" id="navAchievementsBtn">Продолжить</button>
-            </div>
+        <div class="home-stage">
+          <div class="home-title-wrap">
+            <h1 class="home-game-title">Сказочная долина</h1>
+            <p class="home-story" id="storyIntro">Верни свет в волшебные земли. Туман Серых Шёпотов накрыл сады, лес, озеро и замок — помоги фее Люмине собрать звёзды и оживить этот мир.</p>
           </div>
-          <div class="home-heroine">
-            <div class="heroine-glow"></div>
-            <img src="./img/npc.png" alt="Фея Люмина" class="heroine-img">
+
+          <div class="home-bottom-nav">
+            <button class="home-nav-btn" id="navForestBtn">
+              <span class="home-nav-icon">🌿</span>
+              <span>Сказочный мир</span>
+            </button>
+            <button class="play-triangle" id="navPlayBtn" aria-label="В путь">
+              <svg class="play-triangle-svg" viewBox="0 0 180 160" aria-hidden="true" focusable="false">
+                <defs>
+                  <linearGradient id="playGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#fff1a6"/>
+                    <stop offset="35%" stop-color="#ffd84a"/>
+                    <stop offset="70%" stop-color="#ffb02e"/>
+                    <stop offset="100%" stop-color="#ff8a2b"/>
+                  </linearGradient>
+                  <linearGradient id="playShine" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+                    <stop offset="45%" stop-color="rgba(255,255,255,0)"/>
+                  </linearGradient>
+                </defs>
+                <path d="M90 10 C90 10 94 10 98 18 L170 142 C174 150 170 154 162 154 L18 154 C10 154 6 150 10 142 L82 18 C86 10 90 10 90 10 Z" fill="url(#playGrad)" stroke="rgba(255,246,190,0.9)" stroke-width="2"/>
+                <path d="M90 20 C90 20 93 20 96 26 L160 138 C163 144 160 146 154 146 L26 146 C20 146 17 144 20 138 L84 26 C87 20 90 20 90 20 Z" fill="url(#playShine)"/>
+              </svg>
+              <span class="play-triangle-text">В путь</span>
+            </button>
+            <button class="home-nav-btn" id="navAchievementsBtn">
+              <span class="home-nav-icon">🏆</span>
+              <span>Достижения</span>
+            </button>
           </div>
+        </div>
+
+        <div class="heroine-layer" id="heroineLayer">
+          <div class="heroine-speech is-visible" id="heroineSpeech">Привет! Я Люмина. Поможешь вернуть свет волшебным землям?</div>
+          <img src="./img/npc.png" alt="Фея Люмина" class="heroine-img heroine-fixed" id="heroineImg">
         </div>
       </section>
 

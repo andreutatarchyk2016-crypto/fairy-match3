@@ -70,9 +70,54 @@ function nextPlayableLevel() {
   return LEVELS[LEVELS.length - 1].id;
 }
 
+function showAchievementsModal() {
+  ensureAudio();
+  const totalStars = totalStarsEarned(state);
+  const completed = LEVELS.filter((l) => (state.starsEarned[l.id] || 0) > 0).length;
+  const perfect = LEVELS.filter((l) => (state.starsEarned[l.id] || 0) === 3).length;
+  const built = state.upgradesBuilt.length;
+  $("#confetti").innerHTML = "";
+  $("#modalStars").innerHTML = "🏆";
+  $("#modalTitle").textContent = "Достижения";
+  $("#modalText").textContent = "Твои волшебные успехи в Сказочном Саду.";
+  $("#modalReward").innerHTML = `
+    <div style="display:grid;gap:10px;text-align:left;color:var(--text);font-size:.98rem">
+      <div>★ Звёзд собрано: <strong style="color:var(--gold)">${totalStars}</strong></div>
+      <div>🌿 Уровней пройдено: <strong>${completed}/${LEVELS.length}</strong></div>
+      <div>✨ Идеальных уровней: <strong>${perfect}</strong></div>
+      <div>🏡 Построек в мире: <strong>${built}/${UPGRADES.length}</strong></div>
+    </div>`;
+  const actions = $("#modalActions");
+  actions.innerHTML = "";
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "btn btn-primary";
+  closeBtn.textContent = "Круто!";
+  closeBtn.addEventListener("click", hideModal);
+  actions.appendChild(closeBtn);
+  $("#modal").classList.remove("hidden");
+}
+
+const heroinePhrases = [
+  "Привет! Я Люмина. Поможешь вернуть свет волшебным землям?",
+  "Каждая звезда делает этот мир ярче!",
+  "Нажми «В путь», и мы отправимся в приключение.",
+  "В Сказочном мире можно тратить звёзды на чудеса.",
+  "Не сдавайся — даже один ход может всё изменить!"
+];
+let heroineSpeechTimer = null;
+$("#heroineImg")?.addEventListener("click", () => {
+  ensureAudio();
+  const bubble = $("#heroineSpeech");
+  if (!bubble) return;
+  bubble.textContent = heroinePhrases[Math.floor(Math.random() * heroinePhrases.length)];
+  bubble.classList.add("is-visible");
+  clearTimeout(heroineSpeechTimer);
+  heroineSpeechTimer = setTimeout(() => bubble.classList.remove("is-visible"), 4000);
+});
+
 $("#navPlayBtn")?.addEventListener("click", () => { ensureAudio(); renderMap(); showScreen("path"); });
 $("#navForestBtn")?.addEventListener("click", () => { ensureAudio(); renderMap(); showScreen("world"); });
-$("#navAchievementsBtn")?.addEventListener("click", () => { ensureAudio(); showLevelBrief(nextPlayableLevel()); });
+$("#navAchievementsBtn")?.addEventListener("click", () => { ensureAudio(); showAchievementsModal(); });
 
 // ---------- Visual FX ----------
 function initSparkles() {
