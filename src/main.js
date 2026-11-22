@@ -416,60 +416,107 @@ function renderWorld() {
   }
 
   const scene = $("#worldScene");
-  if (garden.scene.bg) {
-    scene.style.background = `url('${garden.scene.bg}') center/cover no-repeat`;
-  } else {
-    scene.style.background = `linear-gradient(180deg, ${garden.scene.sky[0]} 0%, ${garden.scene.sky[1]} 35%, ${garden.scene.ground[0]} 35%, ${garden.scene.ground[1]} 100%)`;
-  }
+  const bwLayer = $("#worldBw");
+  const colorLayer = $("#worldColor");
+  const mist = $("#worldMist");
   const items = $("#worldItems");
-  items.innerHTML = "";
-  for (const u of garden.upgrades) {
-    const el = document.createElement("div");
-    el.className = "world-item" + (builtSet.has(u.id) ? " built" : "");
-    el.textContent = u.icon;
-    Object.assign(el.style, u.sceneStyle);
-    el.title = u.name;
-    items.appendChild(el);
+  const bank = starBank(state, UPGRADES);
+  const totalUp = garden.upgrades.length;
+  const builtCount = garden.upgrades.filter((u) => builtSet.has(u.id)).length;
+  const progress = totalUp ? builtCount / totalUp : 0;
+
+  // layers
+  if (garden.scene.bw && garden.scene.bg) {
+    bwLayer.style.background = `url('${garden.scene.bw}') center/cover no-repeat`;
+    bwLayer.style.opacity = "1";
+    bwLayer.style.filter = "none";
+    colorLayer.style.background = `url('${garden.scene.bg}') center/cover no-repeat`;
+    colorLayer.style.opacity = "1";
+    // reveal mask around built upgrades
+    const reveals = garden.upgrades.filter(u => builtSet.has(u.id)).map(u => {
+      const pos = hotspotPos(u.sceneStyle);
+      return `radial-gradient(circle at ${pos.x}% ${pos.y}%, black 0%, black 16%, rgba(0,0,0,0.92) 24%, transparent 34%)`;
+    });
+    if (reveals.length === 0) {
+      colorLayer.style.webkitMaskImage = "none";
+      colorLayer.style.maskImage = "none";
+      colorLayer.style.opacity = "0";
+    } else if (reveals.length === totalUp) {
+      colorLayer.style.webkitMaskImage = "none";
+      colorLayer.style.maskImage = "none";
+      colorLayer.style.opacity = "1";
+    } else {
+      const mask = reveals.join(", ");
+      colorLayer.style.webkitMaskImage = mask;
+      colorLayer.style.maskImage = mask;
+      colorLayer.style.webkitMaskComposite = "source-over";
+      colorLayer.style.maskComposite = "add";
+      colorLayer.style.opacity = "1";
+    }
+    scene.style.background = "#1a1028";
+  } else if (garden.scene.bg) {
+    bwLayer.style.background = `url('${garden.scene.bg}') center/cover no-repeat`;
+    bwLayer.style.opacity = "1";
+    bwLayer.style.filter = `grayscale(${Math.max(0, 1 - progress)}) brightness(${0.75 + progress * 0.25})`;
+    colorLayer.style.opacity = "0";
+    colorLayer.style.webkitMaskImage = "none";
+    colorLayer.style.maskImage = "none";
+    scene.style.background = "#1a1028";
+  } else {
+    bwLayer.style.background = `linear-gradient(180deg, ${garden.scene.sky[0]} 0%, ${garden.scene.sky[1]} 35%, ${garden.scene.ground[0]} 35%, ${garden.scene.ground[1]} 100%)`;
+    bwLayer.style.filter = `grayscale(${Math.max(0, 1 - progress)})`;
+    bwLayer.style.opacity = "1";
+    colorLayer.style.opacity = "0";
+    colorLayer.style.webkitMaskImage = "none";
+    colorLayer.style.maskImage = "none";
+    scene.style.background = "transparent";
   }
 
-  const builtCount = garden.upgrades.filter((u) => builtSet.has(u.id)).length;
-  const mistOpacity = Math.max(0, 0.72 - builtCount * 0.15);
-  const mist = $("#worldMist");
-  mist.style.opacity = String(mistOpacity);
+  mist.style.opacity = String(Math.max(0, 0.72 - builtCount * 0.15));
   mist.style.background = `linear-gradient(180deg, ${garden.scene.mist}, rgba(140,130,170,0.18))`;
 
-  const list = $("#upgradeList");
-  list.innerHTML = "";
-  const bank = starBank(state, UPGRADES);
+  items.innerHTML = "";
   for (const u of garden.upgrades) {
     const built = builtSet.has(u.id);
     const canBuy = !built && bank >= u.cost;
-    const row = document.createElement("div");
-    row.className = "upgrade" + (built ? " is-built" : "");
-    row.innerHTML = `
-      <div class="upgrade-icon">${u.icon}</div>
-      <div>
-        <div class="upgrade-name">${u.name}</div>
-        <div class="upgrade-desc">${u.desc}</div>
-      </div>
-      <div style="text-align:right">
-        <div class="upgrade-cost ${built ? "built" : ""}">${built ? "Построено" : `★ ${u.cost}`}</div>
-        ${built ? "" : `<button class="btn-buy" ${canBuy ? "" : "disabled"}>${canBuy ? "Построить" : "Нужно звёзд"}</button>`}
-      </div>
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "world-hotspot" + (built ? " is-built" : canBuy ? " is-available" : " is-locked");
+    Object.assign(el.style, u.sceneStyle);
+    el.innerHTML = `
+      <span class="hotspot-pin">${built ? "✓" : "★"}</span>
+      <span class="hotspot-label">
+        <span class="hotspot-name">${u.name}</span>
+        <span class="hotspot-cost">${built ? "Открыто" : `★ ${u.cost}`}</span>
+      </span>
     `;
-    const buyBtn = row.querySelector(".btn-buy");
-    if (buyBtn) {
-      buyBtn.addEventListener("click", () => {
+    el.title = built ? `${u.name} — открыто` : `${u.name} — ${u.cost} ★`;
+    if (!built) {
+      el.addEventListener("click", () => {
         ensureAudio();
         if (buildUpgrade(state, u.id, UPGRADES)) {
           sfxBuy();
           saveState(state);
           renderMap();
+        } else {
+          // show quick feedback
+          el.classList.add("is-denied");
+          setTimeout(() => el.classList.remove("is-denied"), 450);
         }
       });
     }
-    list.appendChild(row);
+    items.appendChild(el);
   }
+}
+
+function hotspotPos(style = {}) {
+  let x = 50, y = 50;
+  if (style.left) x = parseFloat(style.left);
+  if (style.right) x = 100 - parseFloat(style.right);
+  if (style.top) y = parseFloat(style.top);
+  if (style.bottom) y = 100 - parseFloat(style.bottom);
+  // sceneStyle bottom is from bottom, so y is already correct (100-bottom)
+  return { x: Math.max(5, Math.min(95, x)), y: Math.max(5, Math.min(95, y)) };
 }
 
 // ---------- Fairy hint ----------

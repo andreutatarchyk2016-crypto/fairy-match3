@@ -241,42 +241,45 @@ body[data-theme="winter"] .forest-mist-a, body[data-theme="winter"] .forest-mist
 
 .world-scene {
   position: relative; height: 240px; margin: 16px 22px 0; border-radius: 18px; overflow: hidden;
-  background: linear-gradient(180deg, #5b8fd6 0%, #8ec5f6 35%, #b8e3a8 35%, #4a9150 100%);
-  border: 1px solid rgba(255,255,255,0.12);
+  background: #1a1028; border: 1px solid rgba(255,255,255,0.12);
 }
-.world-ground { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 30% at 50% 75%, rgba(255,255,255,0.15), transparent 70%); }
-.world-items { position: absolute; inset: 0; padding: 16px; }
-.world-item {
-  position: absolute; font-size: 2.2rem; filter: grayscale(1) brightness(0.5); opacity: 0.35;
-  transition: filter 0.5s, opacity 0.5s, transform 0.5s; transform: scale(0.95);
-  text-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
-.world-item.built { filter: none; opacity: 1; transform: scale(1); animation: popIn 0.5s ease, itemFloat 4s ease-in-out infinite 0.5s; }
-@keyframes itemFloat { 0%,100%{ transform: translateY(0) scale(1); } 50%{ transform: translateY(-6px) scale(1.03); } }
-@keyframes popIn { 0%{ transform: scale(0.5); opacity: 0; } 70%{ transform: scale(1.1); } 100%{ transform: scale(1); opacity: 1; } }
+.world-layer { position: absolute; inset: 0; background-position: center; background-size: cover; background-repeat: no-repeat; transition: opacity .8s ease, filter .8s ease; }
+.world-layer-color { opacity: 0; }
 .world-mist {
   position: absolute; inset: 0; background: transparent;
   transition: opacity 0.8s ease; pointer-events: none;
 }
-
-.upgrade-list { display: flex; flex-direction: column; gap: 10px; padding: 16px 22px 0; }
-.upgrade {
-  display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: center;
-  padding: 14px; border-radius: 16px; background: rgba(50, 30, 88, 0.6); border: 1px solid rgba(255,255,255,0.12);
+.world-hotspots { position: absolute; inset: 0; }
+.world-hotspot {
+  position: absolute;
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 12px 8px 8px; border-radius: 14px;
+  background: rgba(45, 28, 78, 0.72); border: 1px solid rgba(255,255,255,0.2);
+  color: var(--text); backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(20,10,45,0.35); cursor: pointer;
+  transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, filter .2s ease;
+  max-width: min(220px, 46vw); text-align: left;
 }
-.upgrade.is-built { background: rgba(40, 90, 70, 0.35); border-color: rgba(126,232,199,0.35); }
-.upgrade-icon { width: 44px; height: 44px; display: grid; place-items: center; font-size: 1.6rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.16); border-radius: 12px; }
-.upgrade-name { font-weight: 800; font-size: 0.95rem; }
-.upgrade-desc { font-size: 0.8rem; color: var(--muted); margin-top: 2px; line-height: 1.35; }
-.upgrade-cost { font-weight: 800; color: var(--gold); white-space: nowrap; font-size: 0.9rem; }
-.upgrade-cost.built { color: var(--mint); }
-.btn-buy {
-  padding: 8px 14px; border-radius: 10px; font-weight: 800; font-size: 0.82rem;
-  background: linear-gradient(135deg, #ffe27a, #ffb347); color: #3b2200; border: 1px solid rgba(255,236,170,0.6);
-  box-shadow: 0 4px 14px rgba(255,212,92,0.3); transition: transform 0.15s, filter 0.15s;
+.world-hotspot:hover { transform: scale(1.03); z-index: 2; }
+.world-hotspot.is-available { border-color: rgba(255,216,74,0.7); box-shadow: 0 0 0 2px rgba(255,216,74,0.15), 0 10px 24px rgba(20,10,45,0.35), 0 0 24px rgba(255,216,74,0.18); animation: hotspotPulse 2.4s ease-in-out infinite; }
+.world-hotspot.is-locked { filter: saturate(0.7) brightness(0.95); }
+.world-hotspot.is-built { border-color: rgba(126,232,199,0.55); background: rgba(35, 70, 60, 0.55); cursor: default; }
+.world-hotspot.is-denied { animation: hotspotShake .4s ease; }
+@keyframes hotspotPulse { 0%,100%{ box-shadow: 0 0 0 2px rgba(255,216,74,0.12), 0 10px 24px rgba(20,10,45,0.35), 0 0 18px rgba(255,216,74,0.12); } 50%{ box-shadow: 0 0 0 3px rgba(255,216,74,0.28), 0 12px 28px rgba(20,10,45,0.35), 0 0 30px rgba(255,216,74,0.28); } }
+@keyframes hotspotShake { 0%,100%{ transform: translateX(0); } 25%{ transform: translateX(-4px); } 75%{ transform: translateX(4px); } }
+.hotspot-pin {
+  width: 34px; height: 34px; border-radius: 50%; flex: 0 0 auto;
+  display: grid; place-items: center; font-size: 1rem; font-weight: 900;
+  background: linear-gradient(180deg, #ffe27a, #ffb347); color: #3b2200;
+  box-shadow: 0 4px 10px rgba(255,200,80,0.35);
 }
-.btn-buy:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); }
-.btn-buy:disabled { background: rgba(255,255,255,0.1); color: var(--muted); box-shadow: none; border-color: rgba(255,255,255,0.1); }
+.world-hotspot.is-built .hotspot-pin { background: linear-gradient(180deg, #9ff0d0, #46c48f); color: #0d3b2a; box-shadow: 0 4px 10px rgba(70,196,143,0.3); }
+.world-hotspot.is-locked .hotspot-pin { background: rgba(255,255,255,0.15); color: var(--muted); box-shadow: none; }
+.hotspot-label { display: flex; flex-direction: column; min-width: 0; }
+.hotspot-name { font-size: 0.82rem; font-weight: 800; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.hotspot-cost { font-size: 0.74rem; color: var(--gold); font-weight: 800; }
+.world-hotspot.is-built .hotspot-cost { color: var(--mint); }
+.world-hint { margin: 12px 22px 0; padding: 10px 14px; font-size: 0.85rem; color: var(--muted); text-align: center; background: rgba(45, 28, 80, 0.35); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; }
 
 /* GAME */
 body:has(#screen-game.active) .topbar { display: none; }

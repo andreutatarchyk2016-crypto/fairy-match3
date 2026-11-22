@@ -13,7 +13,7 @@ const GARDEN_DEFS = [
     name: "Сад Чудес",
     short: "Сад",
     story: "Туман Серых Шёпотов укрыл волшебный Сад Чудес. Верни ему свет, цветы и магию.",
-    scene: { sky: ["#5b8fd6", "#8ec5f6"], ground: ["#b8e3a8", "#4a9150"], mist: "rgba(180,170,200,0.55)", bg: "./img/garden-wonder.webp" },
+    scene: { sky: ["#5b8fd6", "#8ec5f6"], ground: ["#b8e3a8", "#4a9150"], mist: "rgba(180,170,200,0.55)", bg: "./img/garden-wonder-color.webp", bw: "./img/garden-wonder-bw.webp" },
     upgrades: [
       { id: "flowers",  name: "Цветочная поляна", desc: "Возвращает яркие цветы у входа в сад.", cost: 2, icon: "🌷", sceneStyle: { left: "12%", bottom: "18%", fontSize: "2.4rem" } },
       { id: "stream",   name: "Волшебный ручей",  desc: "Очищает ручей — вода снова приносит жизнь.", cost: 3, icon: "💧", sceneStyle: { left: "42%", bottom: "12%", fontSize: "2.2rem" } },
