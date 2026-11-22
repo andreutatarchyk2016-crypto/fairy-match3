@@ -151,10 +151,11 @@ button:disabled { opacity: 0.5; cursor: default; }
 .map-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
 .map-panel, .world-panel { padding-bottom: 20px; min-width: 0; }
 
-.level-map {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px;
-  padding: 20px 22px 0;
-}
+.level-map { display: flex; flex-direction: column; gap: 22px; padding: 20px 22px 0; }
+.map-garden-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.map-garden-name { font-size: 1.05rem; font-weight: 900; color: var(--gold); }
+.map-garden-meta { font-size: 0.8rem; color: var(--muted); font-weight: 700; margin-top: 2px; }
+.level-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
 .level-node {
   position: relative; padding: 16px 14px; border-radius: 18px; text-align: left;
   background: transparent; border: 1px solid rgba(255,255,255,0.1);
@@ -170,12 +171,18 @@ button:disabled { opacity: 0.5; cursor: default; }
 .level-stars .earned { color: var(--gold); text-shadow: 0 0 10px rgba(255,212,92,0.4); }
 .level-lock { position: absolute; top: 12px; right: 12px; font-size: 0.9rem; }
 
+.garden-tabs { display: flex; gap: 8px; padding: 16px 22px 0; flex-wrap: wrap; }
+.garden-tab { padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--muted); font-weight: 800; font-size: 0.82rem; display: inline-flex; gap: 6px; align-items: center; }
+.garden-tab small { font-size: 0.72rem; opacity: 0.8; }
+.garden-tab.is-active { background: rgba(255,216,74,0.16); border-color: rgba(255,216,74,0.35); color: var(--text); }
+.garden-story { margin: 12px 22px 0; color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
+
 .world-scene {
-  position: relative; height: 240px; margin: 20px 22px 0; border-radius: 18px; overflow: hidden;
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.22);
+  position: relative; height: 240px; margin: 16px 22px 0; border-radius: 18px; overflow: hidden;
+  background: linear-gradient(180deg, #5b8fd6 0%, #8ec5f6 35%, #b8e3a8 35%, #4a9150 100%);
+  border: 1px solid rgba(255,255,255,0.12);
 }
-.world-ground { position: absolute; inset: 0; background: transparent, transparent 70%); }
+.world-ground { position: absolute; inset: 0; background: radial-gradient(ellipse 60% 30% at 50% 75%, rgba(255,255,255,0.15), transparent 70%); }
 .world-items { position: absolute; inset: 0; padding: 16px; }
 .world-item {
   position: absolute; font-size: 2.2rem; filter: grayscale(1) brightness(0.5); opacity: 0.35;
@@ -376,7 +383,8 @@ body:has(#screen-game.active) #app { padding: 0; max-width: none; }
   .brand-title { font-size: 1.2rem; }
   .hero-panel { grid-template-columns: 1fr; padding: 22px; }
   .panel-head { padding: 18px 16px 0; }
-  .level-map, .upgrade-list { padding-left: 16px; padding-right: 16px; }
+  .level-map, .upgrade-list, .garden-tabs { padding-left: 16px; padding-right: 16px; }
+  .garden-story { margin-left: 16px; margin-right: 16px; }
   .world-scene { margin-left: 16px; margin-right: 16px; height: 200px; }
 
   .game-hud { gap: 8px; padding: calc(6px + env(safe-area-inset-top)) 10px 6px; }

@@ -1,4 +1,4 @@
-import { LEVELS, UPGRADES, TILE_TYPES, STORY_INTRO } from "./data.js";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
@@ -13,6 +13,7 @@ let engine = null;
 let selected = null; // {r,c}
 let currentLevelId = null;
 let endModalShown = false;
+let selectedGardenId = GARDENS[0].id;
 
 // ---------- Audio (simple beeps, no assets) ----------
 let audioCtx = null;
@@ -240,23 +241,38 @@ function renderMap() {
   $("#storyProgressText").textContent = pct + "%";
   $("#levelProgressText").textContent = `${completed}/${total} уровней`;
 
+  // pick garden for UI: current unlocked level's garden
+  const current = LEVELS.find((l) => isLevelUnlocked(l.id, state) && (state.starsEarned[l.id] || 0) === 0) || LEVELS[LEVELS.length - 1];
+  if (current) selectedGardenId = current.gardenId;
+
   const map = $("#levelMap");
   map.innerHTML = "";
-  for (const level of LEVELS) {
-    const unlocked = isLevelUnlocked(level.id, state);
-    const stars = state.starsEarned[level.id] || 0;
-    const isCurrent = unlocked && stars === 0 && (level.id === 1 || (state.starsEarned[level.id - 1] || 0) > 0);
-    const btn = document.createElement("button");
-    btn.className = "level-node" + (unlocked ? "" : " is-locked") + (isCurrent ? " is-current" : "");
-    btn.disabled = !unlocked;
-    btn.innerHTML = `
-      <div class="level-num">Уровень ${level.id}</div>
-      <div class="level-name">${level.title}</div>
-      <div class="level-stars">${[1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("")}</div>
-      ${unlocked ? "" : '<div class="level-lock">🔒</div>'}
-    `;
-    btn.addEventListener("click", () => { ensureAudio(); showLevelBrief(level.id); });
-    map.appendChild(btn);
+  for (const garden of GARDENS) {
+    const section = document.createElement("div");
+    section.className = "map-garden";
+    const levels = LEVELS.filter((l) => l.gardenId === garden.id);
+    const done = levels.filter((l) => (state.starsEarned[l.id] || 0) > 0).length;
+    section.innerHTML = `<div class="map-garden-head"><div><div class="map-garden-name">${garden.name}</div><div class="map-garden-meta">${done}/${levels.length} уровней</div></div></div>`;
+    const grid = document.createElement("div");
+    grid.className = "level-grid";
+    for (const level of levels) {
+      const unlocked = isLevelUnlocked(level.id, state);
+      const stars = state.starsEarned[level.id] || 0;
+      const isCurrent = unlocked && stars === 0 && (level.id === 1 || (state.starsEarned[level.id - 1] || 0) > 0);
+      const btn = document.createElement("button");
+      btn.className = "level-node" + (unlocked ? "" : " is-locked") + (isCurrent ? " is-current" : "");
+      btn.disabled = !unlocked;
+      btn.innerHTML = `
+        <div class="level-num">Уровень ${level.id}</div>
+        <div class="level-name">${level.title}</div>
+        <div class="level-stars">${[1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("")}</div>
+        ${unlocked ? "" : '<div class="level-lock">🔒</div>'}
+      `;
+      btn.addEventListener("click", () => { ensureAudio(); showLevelBrief(level.id); });
+      grid.appendChild(btn);
+    }
+    section.appendChild(grid);
+    map.appendChild(section);
   }
 
   renderWorld();
@@ -264,25 +280,45 @@ function renderMap() {
 
 function renderWorld() {
   const builtSet = new Set(state.upgradesBuilt);
-  const scene = $("#worldItems");
-  scene.innerHTML = "";
-  for (const u of UPGRADES) {
+  const garden = GARDENS.find((g) => g.id === selectedGardenId) || GARDENS[0];
+  selectedGardenId = garden.id;
+  $("#gardenTitle").textContent = garden.name;
+  $("#gardenStory").textContent = garden.story;
+
+  const tabs = $("#gardenTabs");
+  tabs.innerHTML = "";
+  for (const g of GARDENS) {
+    const done = g.upgrades.filter((u) => builtSet.has(u.id)).length;
+    const btn = document.createElement("button");
+    btn.className = "garden-tab" + (g.id === garden.id ? " is-active" : "");
+    btn.innerHTML = `<span>${g.short}</span><small>${done}/${g.upgrades.length}</small>`;
+    btn.addEventListener("click", () => { selectedGardenId = g.id; renderWorld(); });
+    tabs.appendChild(btn);
+  }
+
+  const scene = $("#worldScene");
+  scene.style.background = `linear-gradient(180deg, ${garden.scene.sky[0]} 0%, ${garden.scene.sky[1]} 35%, ${garden.scene.ground[0]} 35%, ${garden.scene.ground[1]} 100%)`;
+  const items = $("#worldItems");
+  items.innerHTML = "";
+  for (const u of garden.upgrades) {
     const el = document.createElement("div");
     el.className = "world-item" + (builtSet.has(u.id) ? " built" : "");
     el.textContent = u.icon;
     Object.assign(el.style, u.sceneStyle);
     el.title = u.name;
-    scene.appendChild(el);
+    items.appendChild(el);
   }
 
-  const builtCount = state.upgradesBuilt.length;
-  const mistOpacity = Math.max(0, 0.75 - builtCount * 0.16);
-  $("#worldMist").style.opacity = String(mistOpacity);
+  const builtCount = garden.upgrades.filter((u) => builtSet.has(u.id)).length;
+  const mistOpacity = Math.max(0, 0.72 - builtCount * 0.15);
+  const mist = $("#worldMist");
+  mist.style.opacity = String(mistOpacity);
+  mist.style.background = `linear-gradient(180deg, ${garden.scene.mist}, rgba(140,130,170,0.18))`;
 
   const list = $("#upgradeList");
   list.innerHTML = "";
   const bank = starBank(state, UPGRADES);
-  for (const u of UPGRADES) {
+  for (const u of garden.upgrades) {
     const built = builtSet.has(u.id);
     const canBuy = !built && bank >= u.cost;
     const row = document.createElement("div");
