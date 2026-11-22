@@ -389,10 +389,10 @@ body:has(#screen-game.active) #app { padding: 0; max-width: none; }
 .tile[data-type="5"] { background: linear-gradient(180deg, #ffc8b0 0%, #ff9468 45%, #e8643c 100%); box-shadow: inset 0 3px 0 rgba(255,255,255,0.5), inset 0 -5px 8px rgba(0,0,0,0.14), 0 6px 14px rgba(232,100,60,0.28), 0 0 0 1px rgba(255,255,255,0.12); }
 
 .board-overlay {
-  position: absolute; inset: 12px; border-radius: 16px;
+  position: absolute; top: 12px; left: 12px; right: 12px; padding: 10px 14px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
-  background: rgba(26,16,40,0.35); color: #fff; font-weight: 800; font-size: 1.2rem;
-  pointer-events: none;
+  background: rgba(45, 28, 80, 0.72); color: #fff; font-weight: 800; font-size: 1rem;
+  pointer-events: none; backdrop-filter: blur(6px); z-index: 6;
 }
 .board-overlay.hidden { display: none; }
 

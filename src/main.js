@@ -18,6 +18,7 @@ let hintMove = null;
 let hintIdleTimer = null;
 let drag = null;
 let suppressClick = false;
+let autoPlaying = false;
 
 // ---------- Audio (simple beeps, no assets) ----------
 let audioCtx = null;
@@ -543,7 +544,7 @@ function clearHint() {
   $$(".tile.hint-from, .tile.hint-to").forEach(el => el.classList.remove("hint-from","hint-to"));
 }
 function showFairyHint(msg) {
-  if (!engine || engine.busy || engine.over) return;
+  if (!engine || engine.busy || engine.over || autoPlaying) return;
   const move = findValidMove(engine.board);
   hintMove = move;
   renderBoard(engine.board, []);
@@ -575,6 +576,8 @@ function startLevel(levelId) {
   currentLevelId = levelId;
   selected = null;
   endModalShown = false;
+  autoPlaying = false;
+  const ov = $("#boardOverlay"); if (ov) { ov.textContent = ""; ov.classList.add("hidden"); }
   clearHint();
   hideModal();
   engine = new GameEngine(level, {
@@ -618,6 +621,74 @@ function startLevel(levelId) {
   scheduleIdleHint();
 }
 
+function countMatchesOnBoard(board) {
+  const size = board.length;
+  const marked = Array.from({ length: size }, () => Array(size).fill(false));
+  let any = false;
+  for (let r = 0; r < size; r++) {
+    let c = 0;
+    while (c < size) {
+      const t = board[r][c]; if (t < 0) { c++; continue; }
+      let end = c + 1; while (end < size && board[r][end] === t) end++;
+      if (end - c >= 3) { for (let k = c; k < end; k++) marked[r][k] = true; any = true; }
+      c = end;
+    }
+  }
+  for (let c = 0; c < size; c++) {
+    let r = 0;
+    while (r < size) {
+      const t = board[r][c]; if (t < 0) { r++; continue; }
+      let end = r + 1; while (end < size && board[end][c] === t) end++;
+      if (end - r >= 3) { for (let k = r; k < end; k++) marked[k][c] = true; any = true; }
+      r = end;
+    }
+  }
+  let n = 0; for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) if (marked[r][c]) n++;
+  return { any, count: n };
+}
+
+function findBestMove(board) {
+  const size = board.length;
+  let best = null;
+  for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+    for (const [dr,dc] of [[1,0],[0,1]]) {
+      const nr = r+dr, nc = c+dc; if (nr>=size||nc>=size) continue;
+      const b = board.map(row => row.slice());
+      [b[r][c], b[nr][nc]] = [b[nr][nc], b[r][c]];
+      const res = countMatchesOnBoard(b);
+      if (!res.any) continue;
+      const score = res.count;
+      if (!best || score > best.score) best = { a:{r,c}, b:{r:nr,c:nc}, score };
+    }
+  }
+  return best;
+}
+
+async function runAutoPlay() {
+  if (autoPlaying || !engine || engine.over) return;
+  const myEngine = engine;
+  autoPlaying = true;
+  const overlay = $("#boardOverlay");
+  if (overlay) { overlay.textContent = "Цель выполнена! Автоигра…"; overlay.classList.remove("hidden"); }
+  try {
+    while (engine === myEngine && !myEngine.over && myEngine.movesLeft > 0) {
+      if (!$("#screen-game").classList.contains("active")) break;
+      const move = findBestMove(myEngine.board);
+      if (!move) break;
+      selected = null;
+      await myEngine.trySwap(move.a, move.b);
+      if (engine !== myEngine) break;
+      if (!myEngine.over) renderBoard(myEngine.board, []);
+      await new Promise(res => setTimeout(res, 180));
+    }
+  } finally {
+    if (engine === myEngine) {
+      autoPlaying = false;
+      if (overlay) { overlay.textContent = ""; overlay.classList.add("hidden"); }
+    }
+  }
+}
+
 function updateHUD() {
   if (!engine) return;
   const snap = engine.snapshot();
@@ -637,6 +708,10 @@ function updateHUD() {
   $$("#starsRow .star-slot").forEach((el, i) => {
     el.classList.toggle("earned", i < stars);
   });
+
+  if (!engine.busy && goal.done && !snap.over && snap.movesLeft > 0 && !autoPlaying) {
+    runAutoPlay();
+  }
 
   if (snap.over && !endModalShown) {
     endModalShown = true;
@@ -684,7 +759,7 @@ async function onTileClick(e) {
   ensureAudio();
   clearHint();
   clearTimeout(hintIdleTimer);
-  if (!engine || engine.busy || engine.over) return;
+  if (!engine || engine.busy || engine.over || autoPlaying) return;
   const tile = e.currentTarget;
   const r = Number(tile.dataset.r);
   const c = Number(tile.dataset.c);
@@ -721,7 +796,7 @@ function setupSwipe() {
   if (!boardEl) return;
   const THRESH = 22;
   boardEl.addEventListener("pointerdown", (e) => {
-    if (!engine || engine.busy || engine.over) return;
+    if (!engine || engine.busy || engine.over || autoPlaying) return;
     const tile = e.target.closest(".tile");
     if (!tile || tile.classList.contains("empty")) return;
     drag = {
@@ -733,7 +808,7 @@ function setupSwipe() {
   });
   boardEl.addEventListener("pointermove", async (e) => {
     if (!drag || drag.handled || e.pointerId !== drag.pointerId) return;
-    if (!engine || engine.busy || engine.over) return;
+    if (!engine || engine.busy || engine.over || autoPlaying) return;
     const dx = e.clientX - drag.startX;
     const dy = e.clientY - drag.startY;
     if (Math.abs(dx) < THRESH && Math.abs(dy) < THRESH) return;
