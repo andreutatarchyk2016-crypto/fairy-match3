@@ -16,6 +16,8 @@ let endModalShown = false;
 let selectedGardenId = GARDENS[0].id;
 let hintMove = null;
 let hintIdleTimer = null;
+let drag = null;
+let suppressClick = false;
 
 // ---------- Audio (simple beeps, no assets) ----------
 let audioCtx = null;
@@ -631,6 +633,7 @@ function renderBoard(board, markedMatrix = [], spawn = false) {
 }
 
 async function onTileClick(e) {
+  if (suppressClick) { suppressClick = false; return; }
   ensureAudio();
   clearHint();
   clearTimeout(hintIdleTimer);
@@ -663,6 +666,54 @@ async function onTileClick(e) {
     renderBoard(engine.board, []);
   }
   scheduleIdleHint();
+}
+
+// ---------- Swipe ----------
+function setupSwipe() {
+  const boardEl = $("#board");
+  if (!boardEl) return;
+  const THRESH = 22;
+  boardEl.addEventListener("pointerdown", (e) => {
+    if (!engine || engine.busy || engine.over) return;
+    const tile = e.target.closest(".tile");
+    if (!tile || tile.classList.contains("empty")) return;
+    drag = {
+      startX: e.clientX, startY: e.clientY,
+      r: Number(tile.dataset.r), c: Number(tile.dataset.c),
+      handled: false, pointerId: e.pointerId,
+    };
+    boardEl.setPointerCapture?.(e.pointerId);
+  });
+  boardEl.addEventListener("pointermove", async (e) => {
+    if (!drag || drag.handled || e.pointerId !== drag.pointerId) return;
+    if (!engine || engine.busy || engine.over) return;
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+    if (Math.abs(dx) < THRESH && Math.abs(dy) < THRESH) return;
+    let dr = 0, dc = 0;
+    if (Math.abs(dx) > Math.abs(dy)) dc = dx > 0 ? 1 : -1;
+    else dr = dy > 0 ? 1 : -1;
+    const nr = drag.r + dr, nc = drag.c + dc;
+    drag.handled = true;
+    suppressClick = true;
+    if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) return;
+    ensureAudio();
+    clearHint();
+    clearTimeout(hintIdleTimer);
+    selected = null;
+    renderBoard(engine.board, []);
+    await engine.trySwap({ r: drag.r, c: drag.c }, { r: nr, c: nc });
+    if (!engine.over) renderBoard(engine.board, []);
+    scheduleIdleHint();
+  });
+  const endDrag = (e) => {
+    if (!drag) return;
+    if (drag.handled) { suppressClick = true; setTimeout(() => { suppressClick = false; }, 250); }
+    if (e?.pointerId != null) boardEl.releasePointerCapture?.(e.pointerId);
+    drag = null;
+  };
+  boardEl.addEventListener("pointerup", endDrag);
+  boardEl.addEventListener("pointercancel", endDrag);
 }
 
 // ---------- Modal ----------
@@ -772,6 +823,7 @@ $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") { /*
 initSparkles();
 initHomePathSparkles();
 initParallax();
+setupSwipe();
 applyTheme();
 renderMap();
 applyWorldProgression();
