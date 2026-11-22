@@ -11,12 +11,21 @@
 </head>
 <body>
   <div id="app">
-    <div class="bg-orbs" aria-hidden="true">
-      <span class="orb orb-a"></span>
-      <span class="orb orb-b"></span>
-      <span class="orb orb-c"></span>
-      <span class="orb orb-d"></span>
-      <div class="bg-sparkles" id="bgSparkles"></div>
+    <div class="forest-bg" aria-hidden="true">
+      <div class="forest-sky"></div>
+      <div class="forest-mist forest-mist-a"></div>
+      <div class="forest-mist forest-mist-b"></div>
+      <div class="forest-trees forest-trees-far"></div>
+      <div class="forest-trees forest-trees-mid"></div>
+      <div class="forest-trees forest-trees-near"></div>
+      <div class="forest-glow"></div>
+      <div class="forest-fireflies" id="bgSparkles"></div>
+    </div>
+
+    <div class="npc-companion" id="npcCompanion" aria-hidden="true">
+      <div class="npc-bubble" id="npcBubble">Добро пожаловать в Сказочный Сад!</div>
+      <img class="npc-sprite" src="./assets/npc.png" alt="" />
+      <div class="npc-shadow"></div>
     </div>
 
     <header class="topbar">
@@ -78,6 +87,21 @@
             <div id="upgradeList" class="upgrade-list"></div>
           </div>
         </div>
+        <nav class="main-nav" aria-label="Главная навигация">
+          <button class="nav-orb nav-orb-side" id="navForestBtn" type="button">
+            <span class="nav-orb-icon">🌲</span>
+            <span class="nav-orb-label">Сказочный лес</span>
+          </button>
+          <button class="nav-orb nav-orb-main" id="navPlayBtn" type="button">
+            <span class="nav-orb-ring"></span>
+            <span class="nav-orb-icon">✦</span>
+            <span class="nav-orb-label">В путь</span>
+          </button>
+          <button class="nav-orb nav-orb-side" id="navAchievementsBtn" type="button">
+            <span class="nav-orb-icon">🏆</span>
+            <span class="nav-orb-label">Достижения</span>
+          </button>
+        </nav>
       </section>
 
       <!-- GAME SCREEN -->

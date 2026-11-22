@@ -57,19 +57,66 @@ $("#soundBtn").addEventListener("click", () => {
   if (soundEnabled) ensureAudio();
 });
 
+function nextPlayableLevel() {
+  for (const level of LEVELS) {
+    if (isLevelUnlocked(level.id, state)) {
+      const stars = state.starsEarned[level.id] || 0;
+      if (stars === 0) return level.id;
+    }
+  }
+  return LEVELS[LEVELS.length - 1].id;
+}
+
+function showAchievementsModal() {
+  ensureAudio();
+  const totalStars = totalStarsEarned(state);
+  const completed = LEVELS.filter((l) => (state.starsEarned[l.id] || 0) > 0).length;
+  const perfect = LEVELS.filter((l) => (state.starsEarned[l.id] || 0) === 3).length;
+  const built = state.upgradesBuilt.length;
+  $("#confetti").innerHTML = "";
+  $("#modalStars").innerHTML = "🏆";
+  $("#modalTitle").textContent = "Достижения";
+  $("#modalText").textContent = "Твои волшебные успехи в Сказочном Саду.";
+  $("#modalReward").innerHTML = `
+    <div style="display:grid;gap:10px;text-align:left;color:var(--text);font-size:.98rem">
+      <div>★ Звёзд собрано: <strong style="color:var(--gold)">${totalStars}</strong></div>
+      <div>🌿 Уровней пройдено: <strong>${completed}/${LEVELS.length}</strong></div>
+      <div>✨ Идеальных уровней: <strong>${perfect}</strong></div>
+      <div>🏡 Построек в саду: <strong>${built}/${UPGRADES.length}</strong></div>
+    </div>`;
+  const actions = $("#modalActions");
+  actions.innerHTML = "";
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "btn btn-primary";
+  closeBtn.textContent = "Круто!";
+  closeBtn.addEventListener("click", hideModal);
+  actions.appendChild(closeBtn);
+  $("#modal").classList.remove("hidden");
+}
+
+$("#navPlayBtn")?.addEventListener("click", () => { ensureAudio(); showLevelBrief(nextPlayableLevel()); });
+$("#navForestBtn")?.addEventListener("click", () => {
+  ensureAudio();
+  document.querySelector(".world-panel")?.scrollIntoView({ behavior: "smooth", block: "center" });
+  const bubble = $("#npcBubble");
+  if (bubble) { bubble.textContent = "Это Сказочный лес! Восстанавливай сад звёздами ✨"; }
+});
+$("#navAchievementsBtn")?.addEventListener("click", showAchievementsModal);
+
 // ---------- Visual FX ----------
 function initSparkles() {
   const wrap = $("#bgSparkles");
   if (!wrap) return;
   wrap.innerHTML = "";
-  for (let i = 0; i < 28; i++) {
+  for (let i = 0; i < 34; i++) {
     const s = document.createElement("span");
     s.className = "bg-sparkle";
     s.style.left = Math.random() * 100 + "%";
-    s.style.top = Math.random() * 100 + "%";
-    s.style.setProperty("--dur", (2.4 + Math.random() * 3.2).toFixed(2) + "s");
-    s.style.setProperty("--delay", (-Math.random() * 4).toFixed(2) + "s");
-    const size = 2 + Math.random() * 4;
+    s.style.top = (20 + Math.random() * 75) + "%";
+    s.style.setProperty("--dur", (2.4 + Math.random() * 3.8).toFixed(2) + "s");
+    s.style.setProperty("--drift", (6 + Math.random() * 8).toFixed(2) + "s");
+    s.style.setProperty("--delay", (-Math.random() * 5).toFixed(2) + "s");
+    const size = 2 + Math.random() * 5;
     s.style.width = size + "px";
     s.style.height = size + "px";
     wrap.appendChild(s);
@@ -318,11 +365,13 @@ function updateHUD() {
   if (!engine) return;
   const snap = engine.snapshot();
   const goal = snap.goal;
+  const [s1, s2, s3] = engine.level.starThresholds;
   $("#scoreText").textContent = String(snap.score);
-  $("#targetScoreText").textContent = String(engine.level.starThresholds[0]);
-  $("#movesText").textContent = `${snap.movesLeft} ходов`;
+  $("#targetScoreText").textContent = String(s1);
+  $("#movesText").textContent = `${snap.movesLeft}`;
   $("#goalText").textContent = goal.text;
-  $("#goalProgressText").textContent = `${Math.min(goal.current, goal.target)} / ${goal.target}`;
+  const nextStar = snap.stars < 1 ? `★ ${s1}` : snap.stars < 2 ? `★★ ${s2}` : snap.stars < 3 ? `★★★ ${s3}` : "★★★ макс";
+  $("#goalProgressText").textContent = `${Math.min(goal.current, goal.target)}/${goal.target} · ${nextStar}`;
   const pct = Math.min(100, (goal.current / goal.target) * 100);
   $("#goalProgressFill").style.width = pct + "%";
 
@@ -412,11 +461,12 @@ function showLevelBrief(levelId) {
   const goal = level.goal.type === "score"
     ? `Набрать ${level.goal.target} очков`
     : `Собрать ${TILE_TYPES[level.goal.tile].gem} ${TILE_TYPES[level.goal.tile].name}: ${level.goal.target}`;
+  const [s1, s2, s3] = level.starThresholds;
   $("#confetti").innerHTML = "";
   $("#modalStars").innerHTML = [1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("");
   $("#modalTitle").textContent = `Уровень ${level.id}: ${level.title}`;
   $("#modalText").textContent = level.story;
-  $("#modalReward").innerHTML = `<div style="color:var(--text);font-size:0.98rem;line-height:1.5"><strong style="color:var(--gold)">Цель:</strong> ${goal}<br><span style="color:var(--muted)">Ходов: ${level.moves}</span></div>`;
+  $("#modalReward").innerHTML = `<div style="color:var(--text);font-size:0.98rem;line-height:1.6"><strong style="color:var(--gold)">Цель:</strong> ${goal}<br><span style="color:var(--muted)">Ходов: ${level.moves}</span><div style="margin-top:8px;color:var(--muted)"><strong style="color:var(--gold)">Звёзды:</strong> ★ ${s1} · ★★ ${s2} · ★★★ ${s3} очков</div></div>`;
   const actions = $("#modalActions");
   actions.innerHTML = "";
   const backBtn = document.createElement("button");
@@ -460,8 +510,9 @@ function showEndModal(snap) {
     ? `«${level.title}» завершён. ${gained > 0 ? `Отлично! Вы заработали ${stars} ${starWord}!` : `Вы набрали ${stars} ${starWord} за этот уровень.`}`
     : `Не хватило немного магии. Попробуй ещё раз — цель: ${engine.goalProgress().text.toLowerCase()}.`;
 
-  $("#modalReward").textContent = won
-    ? `Счёт: ${snap.score} · Звёзды за уровень: ${stars}/3${gained > 0 ? ` (+${gained})` : ""}`
+  const [s1,s2,s3] = level.starThresholds;
+  $("#modalReward").innerHTML = won
+    ? `<div>Счёт: ${snap.score}</div><div style="margin-top:4px;color:var(--muted);font-size:0.9rem">Звёзды: ★ ${s1} · ★★ ${s2} · ★★★ ${s3}</div>`
     : `Счёт: ${snap.score}`;
 
   const actions = $("#modalActions");
