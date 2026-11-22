@@ -478,25 +478,20 @@ body:has(#screen-home.active) .topbar { display: none; }
 body:has(#screen-home.active) #app { padding: 0; max-width: none; }
 #screen-home.active { position: relative; min-height: 100svh; overflow: hidden; }
 .home-stage { position: relative; z-index: 2; min-height: 100svh; display: flex; flex-direction: column; justify-content: space-between; padding: 48px 24px calc(28px + env(safe-area-inset-bottom)); }
-.home-title-wrap, .menu-header { text-align: center; max-width: 980px; margin: 0 auto; padding: 10px 16px; display:flex; flex-direction:column; align-items:center; gap:14px; }
+.home-title-wrap, .menu-header {
+  text-align: center; width: 100%; max-width: 980px; margin: 0 auto; padding: 10px 16px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  color: #fffdfa; font-family: "Cinzel Decorative", "Cinzel", "Times New Roman", serif;
+}
 .menu-title {
-  margin: 0; font-family: "Cinzel Decorative", Georgia, serif; font-weight: 700;
-  font-size: clamp(2.8rem, 6.2vw, 6rem); line-height: 1.05; letter-spacing: 0.01em;
-  color: #FFF3C4; position: relative; padding: 0 24px;
-  text-shadow: 0 1px 0 #8A6420, 0 2px 0 #7A5618, 0 4px 12px rgba(0,0,0,0.35), 0 0 24px rgba(255,228,140,0.45), 0 0 60px rgba(232,200,106,0.22);
+  margin: 0; font-family: "Cinzel Decorative", "Cinzel", "Times New Roman", serif; font-weight: 700;
+  font-size: clamp(2.8rem, 6vw, 4rem); line-height: 1.1; letter-spacing: 2px; color: #fffdfa;
+  text-shadow: 0 0 15px rgba(255, 215, 0, 0.8), 2px 2px 4px rgba(0, 0, 0, 0.8);
 }
-.menu-title span {
-  background: linear-gradient(180deg, #FFFBEF 0%, #F6DEA0 30%, #DDB156 58%, #F8E4A8 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+.menu-subtitle {
+  margin: 0 0 18px; max-width: 920px; font-size: clamp(1.1rem, 2.2vw, 1.5rem); font-weight: 600;
+  color: #e8e1c9; text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
 }
-.menu-title::before {
-  content: attr(data-text); position: absolute; inset: 0; padding: 0 24px;
-  background: linear-gradient(180deg, #FFFBE8 0%, #F2D889 28%, #D4A84A 60%, #FFF0B8 100%);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
-  filter: drop-shadow(0 0 10px rgba(255,236,170,0.35)); pointer-events: none;
-}
-.title-ornament { width: min(520px, 60vw); height: 20px; margin-top: -2px; opacity: 0.95; filter: drop-shadow(0 0 8px rgba(232,200,106,0.35)); }
-.menu-subtitle { margin: 0 auto; max-width: 920px; font-family: "Cormorant Garamond", Georgia, serif; font-size: clamp(1rem, 1.9vw, 2rem); font-weight: 600; line-height: 1.35; color: #FFF6D8; letter-spacing: 0.03em; text-shadow: 0 2px 10px rgba(0,0,0,0.45), 0 0 20px rgba(255,244,200,0.18); padding: 0 16px; }
 
 /* Central magical path */
 .home-path { position: absolute; left: 50%; top: 48%; bottom: 180px; width: min(220px, 40vw); transform: translateX(-50%); pointer-events: none; z-index: 1; }
@@ -507,25 +502,22 @@ body:has(#screen-home.active) #app { padding: 0; max-width: none; }
 .path-sparkle { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: rgba(255,245,180,0.95); box-shadow: 0 0 8px 2px rgba(255,220,100,0.8); animation: pathSparkleFloat var(--pd,3s) ease-in-out infinite; opacity: 0; }
 @keyframes pathSparkleFloat { 0%{ opacity:0; transform: translateY(12px) scale(0.5); } 25%{ opacity:0.9; } 75%{ opacity:0.6; } 100%{ opacity:0; transform: translateY(-28px) scale(1); } }
 
-.menu-buttons { display: flex; align-items: flex-end; justify-content: center; gap: clamp(18px, 3vw, 56px); padding: 16px 10px 0; position: relative; z-index: 5; flex-wrap: wrap; }
-.menu-btn { position: relative; border: none; background: transparent; padding: 0; cursor: pointer; font-family: "Cinzel Decorative", Georgia, serif; color: #FFF8E7; transition: transform .28s ease, filter .28s ease; outline: none; -webkit-tap-highlight-color: transparent; }
-.menu-btn:focus-visible { filter: brightness(1.08); }
-.menu-btn:hover { transform: translateY(-4px) scale(1.015); }
-.menu-btn:active { transform: translateY(0) scale(0.995); }
-.menu-btn .btn-svg { display: block; width: 100%; height: auto; overflow: visible; }
-.menu-btn .btn-label { position: absolute; inset: 0; display: grid; place-items: center; font-size: clamp(20px, 1.9vw, 34px); font-weight: 700; letter-spacing: 0.02em; text-shadow: 0 2px 6px rgba(0,0,0,0.45); pointer-events: none; padding-bottom: 2px; }
-.menu-btn.btn-secondary { width: clamp(220px, 22vw, 340px); }
-.menu-btn.btn-primary { width: clamp(280px, 27vw, 430px); margin-bottom: 6px; }
-.menu-btn.btn-primary .btn-label { font-size: clamp(28px, 2.8vw, 48px); letter-spacing: 0.03em; }
-.menu-btn.btn-primary .portal-glow { transform-origin: center; animation: portalPulse 3.6s ease-in-out infinite; }
-.menu-btn.btn-primary .portal-aura { transform-origin: center; animation: auraPulse 3.6s ease-in-out infinite; }
-.menu-btn.btn-primary .portal-spark { animation: sparkDrift 4.5s ease-in-out infinite; }
-@keyframes auraPulse { 0%,100% { opacity: 0.35; transform: scale(0.985); } 50% { opacity: 0.7; transform: scale(1.02); } }
-@keyframes sparkDrift { 0%,100% { opacity: 0.35; transform: translateY(0); } 50% { opacity: 0.9; transform: translateY(-2px); } }
-.menu-btn.btn-secondary .hover-glow { opacity: 0; transition: opacity .28s ease; }
-.menu-btn.btn-secondary:hover .hover-glow, .menu-btn.btn-secondary:focus-visible .hover-glow { opacity: 1; }
-.menu-btn.btn-secondary:hover { filter: drop-shadow(0 8px 18px rgba(0,0,0,0.25)); }
-.menu-btn.btn-primary:hover { filter: drop-shadow(0 0 24px rgba(255,214,110,0.28)); }
+.menu-buttons { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; padding: 16px 10px 0; position: relative; z-index: 5; }
+.menu-btn {
+  padding: 20px 40px; font-size: 1.5rem; font-family: "Cinzel Decorative", "Cinzel", "Times New Roman", serif;
+  font-weight: 700; border: none; cursor: pointer; border-radius: 50px;
+  transition: all 0.3s ease; position: relative; overflow: hidden; color: #fffdfa;
+}
+.menu-btn-primary {
+  background: linear-gradient(145deg, #2a5a2a, #4a8a4a);
+  color: #fffdfa; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); border: 2px solid #ffd700;
+}
+.menu-btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); background: linear-gradient(145deg, #3a7a3a, #5aa55a); }
+.menu-btn-secondary {
+  background: rgba(100, 80, 60, 0.8); color: #fffdfa;
+  border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(5px);
+}
+.menu-btn-secondary:hover { background: rgba(130, 100, 80, 0.9); box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); }
 
 .home-theme-btn { position: absolute; top: 18px; right: 18px; z-index: 6; padding: 10px 14px; border-radius: 14px; font-weight: 800; font-size: 0.9rem; background: rgba(50, 30, 85, 0.7); border: 1px solid rgba(255,255,255,0.2); color: var(--text); backdrop-filter: blur(8px); box-shadow: 0 6px 16px rgba(20,10,45,0.25); }
 .home-theme-btn:hover { background: rgba(70, 45, 115, 0.8); transform: translateY(-1px); }
@@ -576,12 +568,10 @@ body:has(#screen-home.active) #app { padding: 0; max-width: none; }
 
 @media (max-width: 900px) {
   .home-stage { padding: 32px 16px calc(20px + env(safe-area-inset-bottom)); }
-  .menu-title { font-size: clamp(2.4rem, 10vw, 4.2rem); padding: 0 12px; }
-  .menu-title::before { padding: 0 12px; }
+  .menu-title { font-size: clamp(2.2rem, 10vw, 3.2rem); padding: 0 12px; }
   .menu-subtitle { font-size: 1rem; max-width: 34ch; }
   .menu-buttons { gap: 12px; }
-  .menu-btn.btn-secondary { width: min(290px, 42vw); }
-  .menu-btn.btn-primary { width: min(360px, 78vw); order: -1; margin-bottom: 0; }
+  .menu-btn { padding: 16px 28px; font-size: 1.2rem; }
   .heroine-layer { width: min(46vw, 280px); opacity: 0.95; }
   .heroine-speech { left: 45%; bottom: 66%; max-width: 200px; font-size: 0.86rem; }
 }
@@ -590,8 +580,8 @@ body:has(#screen-home.active) #app { padding: 0; max-width: none; }
   .home-stage { justify-content: flex-start; gap: 20px; padding-top: 40px; }
   .home-title-wrap { margin-top: 0; }
   .menu-buttons { margin-top: auto; flex-direction: column; align-items: center; gap: 14px; width: 100%; }
-  .menu-btn.btn-primary, .menu-btn.btn-secondary { width: min(320px, 84vw); order: initial; }
-  .menu-btn.btn-primary { order: -1; }
+  .menu-btn { width: min(320px, 84vw); padding: 16px 24px; font-size: 1.2rem; }
+  .menu-btn-primary { order: -1; }
   .heroine-layer { width: min(54vw, 250px); left: -10px; bottom: 108px; z-index: 20; }
   .heroine-speech { left: 40%; bottom: 70%; max-width: 170px; font-size: 0.8rem; padding: 10px 12px; }
 }
