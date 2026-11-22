@@ -6,7 +6,7 @@
   <title>Сказочный Сад — 3 в ряд</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gabriela&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:wght@500;600;700&family=Gabriela&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -46,9 +46,14 @@
       <!-- HOME -->
       <section id="screen-home" class="screen active">
         <div class="home-stage">
-          <div class="home-title-wrap">
-            <h1 class="home-game-title">Сказочная долина</h1>
-            <p class="home-story" id="storyIntro">Верни свет в волшебные земли. Туман Серых Шёпотов накрыл сады, лес, озеро и замок — помоги фее Люмине собрать звёзды и оживить этот мир.</p>
+          <div class="home-title-wrap menu-header">
+            <h1 class="home-game-title menu-title" data-text="Сказочная долина"><span>Сказочная долина</span></h1>
+            <svg class="title-ornament" viewBox="0 0 520 20" fill="none" aria-hidden="true">
+              <defs><linearGradient id="ornG" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#E8C86A" stop-opacity="0"/><stop offset="20%" stop-color="#E8C86A" stop-opacity="0.8"/><stop offset="50%" stop-color="#FFF2C0"/><stop offset="80%" stop-color="#E8C86A" stop-opacity="0.8"/><stop offset="100%" stop-color="#E8C86A" stop-opacity="0"/></linearGradient></defs>
+              <path d="M10 10H210C225 10 232 4 245 4C253 4 258 8 260 10C262 8 267 4 275 4C288 4 295 10 310 10H510" stroke="url(#ornG)" stroke-width="2.2" stroke-linecap="round"/>
+              <path d="M260 2L266 10L260 18L254 10Z" fill="#F5DC93" stroke="#B8892E" stroke-width="1"/>
+            </svg>
+            <p class="home-story menu-subtitle" id="storyIntro">Помоги фее Люмине вернуть свет в волшебную долину</p>
           </div>
 
           <div class="home-path" aria-hidden="true">
@@ -56,36 +61,66 @@
             <div class="home-path-sparkles" id="homePathSparkles"></div>
           </div>
 
-          <div class="home-bottom-nav">
-            <button class="home-nav-btn home-nav-wood" id="navForestBtn">
-              <span class="home-nav-icon">🌿</span>
-              <span>Сказочный мир</span>
-            </button>
-            <button class="play-triangle" id="navPlayBtn" aria-label="В путь">
-              <span class="play-portal-ring"></span>
-              <svg class="play-triangle-svg" viewBox="0 0 180 160" aria-hidden="true" focusable="false">
+          <nav class="menu-buttons" aria-label="Главное меню">
+            <button class="menu-btn btn-secondary" id="navForestBtn" type="button">
+              <svg class="btn-svg" viewBox="0 0 340 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <defs>
-                  <linearGradient id="playGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#fff6b8"/>
-                    <stop offset="30%" stop-color="#ffe06a"/>
-                    <stop offset="65%" stop-color="#ffb02e"/>
-                    <stop offset="100%" stop-color="#ff8a2b"/>
-                  </linearGradient>
-                  <linearGradient id="playShine" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="rgba(255,255,255,0.65)"/>
-                    <stop offset="45%" stop-color="rgba(255,255,255,0)"/>
-                  </linearGradient>
+                  <linearGradient id="woodG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#8B5E34"/><stop offset="45%" stop-color="#6E4524"/><stop offset="100%" stop-color="#5A351B"/></linearGradient>
+                  <linearGradient id="woodLight" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFF0C0" stop-opacity="0.22"/><stop offset="100%" stop-color="#FFF0C0" stop-opacity="0"/></linearGradient>
+                  <linearGradient id="goldTrim" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFF3C2"/><stop offset="45%" stop-color="#D6A848"/><stop offset="100%" stop-color="#F2D078"/></linearGradient>
+                  <filter id="woodShadow" x="-20%" y="-30%" width="140%" height="180%"><feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#120B05" flood-opacity="0.45"/></filter>
                 </defs>
-                <path d="M90 10 C90 10 94 10 98 18 L170 142 C174 150 170 154 162 154 L18 154 C10 154 6 150 10 142 L82 18 C86 10 90 10 90 10 Z" fill="url(#playGrad)" stroke="rgba(255,248,210,0.95)" stroke-width="2.5"/>
-                <path d="M90 20 C90 20 93 20 96 26 L160 138 C163 144 160 146 154 146 L26 146 C20 146 17 144 20 138 L84 26 C87 20 90 20 90 20 Z" fill="url(#playShine)"/>
+                <g filter="url(#woodShadow)">
+                  <path d="M28 18 C30 10 38 8 52 8 L288 8 C302 8 310 10 312 18 L330 56 L312 94 C310 102 302 104 288 104 L52 104 C38 104 30 102 28 94 L10 56 Z" fill="url(#woodG)" stroke="url(#goldTrim)" stroke-width="3.5"/>
+                  <path d="M34 22 C36 16 42 14 54 14 L286 14 C298 14 304 16 306 22 L322 56 L306 90 C304 96 298 98 286 98 L54 98 C42 98 36 96 34 90 L18 56 Z" fill="none" stroke="#3E2312" stroke-opacity="0.35" stroke-width="2"/>
+                  <path d="M28 18 C30 10 38 8 52 8 L288 8 C302 8 310 10 312 18 L330 56 L312 56 L10 56 Z" fill="url(#woodLight)"/>
+                  <g stroke="#3A200F" stroke-opacity="0.22" stroke-width="2" fill="none"><path d="M60 28C95 34 130 24 170 30C210 36 245 26 280 32"/><path d="M64 74C100 68 135 80 175 74C215 68 250 78 276 72"/></g>
+                  <g stroke="#E5C06A" stroke-opacity="0.7" stroke-width="2" fill="none"><path d="M52 24h18M52 24v18M288 24h-18M288 24v18M52 88h18M52 88v-18M288 88h-18M288 88v-18"/></g>
+                  <circle cx="30" cy="56" r="5" fill="#D8B15A" stroke="#7A531F" stroke-width="1.5"/><circle cx="310" cy="56" r="5" fill="#D8B15A" stroke="#7A531F" stroke-width="1.5"/>
+                </g>
+                <rect class="hover-glow" x="18" y="14" width="304" height="84" rx="18" fill="#FFE7A0" opacity="0.08"/>
               </svg>
-              <span class="play-triangle-text">В путь</span>
+              <span class="btn-label">Сказочный мир</span>
             </button>
-            <button class="home-nav-btn home-nav-wood" id="navAchievementsBtn">
-              <span class="home-nav-icon">🏆</span>
-              <span>Достижения</span>
+
+            <button class="menu-btn btn-primary" id="navPlayBtn" type="button" aria-label="В путь">
+              <svg class="btn-svg" viewBox="0 0 430 170" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                  <radialGradient id="portalInner" cx="50%" cy="45%" r="60%"><stop offset="0%" stop-color="#FFFCE8"/><stop offset="28%" stop-color="#FFE79A"/><stop offset="58%" stop-color="#E3B452"/><stop offset="100%" stop-color="#8E6530"/></radialGradient>
+                  <linearGradient id="stoneFrame" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#9A9083"/><stop offset="50%" stop-color="#70685A"/><stop offset="100%" stop-color="#5A5348"/></linearGradient>
+                  <linearGradient id="goldEdge" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFF4C8"/><stop offset="50%" stop-color="#D4A848"/><stop offset="100%" stop-color="#F0D080"/></linearGradient>
+                  <filter id="portalShadow" x="-30%" y="-40%" width="160%" height="200%"><feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#171005" flood-opacity="0.5"/></filter>
+                </defs>
+                <ellipse class="portal-aura" cx="215" cy="82" rx="185" ry="68" fill="#FFD978" opacity="0.35"/>
+                <g filter="url(#portalShadow)">
+                  <path d="M62 40 C68 22 88 16 118 16 L312 16 C342 16 362 22 368 40 L398 84 L368 128 C362 146 342 152 312 152 L118 152 C88 152 68 146 62 128 L32 84 Z" fill="url(#stoneFrame)" stroke="url(#goldEdge)" stroke-width="4"/>
+                  <path class="portal-glow" d="M74 44 C79 30 96 25 122 25 L308 25 C334 25 351 30 356 44 L382 84 L356 124 C351 138 334 143 308 143 L122 143 C96 143 79 138 74 124 L48 84 Z" fill="url(#portalInner)"/>
+                  <path d="M74 44 C79 30 96 25 122 25 L308 25 C334 25 351 30 356 44 L382 84 L356 84 L48 84 Z" fill="#FFFBE6" opacity="0.16"/>
+                  <g stroke="#FFF3C8" stroke-opacity="0.28" stroke-width="2" fill="none"><path d="M215 25L215 143"/><path d="M122 25L165 84L122 143"/><path d="M308 25L265 84L308 143"/><path d="M74 44L165 84L74 124"/><path d="M356 44L265 84L356 124"/><path d="M165 84H265"/></g>
+                  <g class="portal-spark" fill="#FFFCE0"><circle cx="150" cy="58" r="2.8" opacity="0.9"/><circle cx="276" cy="62" r="2.2" opacity="0.8"/><circle cx="215" cy="104" r="2.5" opacity="0.75"/></g>
+                </g>
+              </svg>
+              <span class="btn-label">В путь</span>
             </button>
-          </div>
+
+            <button class="menu-btn btn-secondary" id="navAchievementsBtn" type="button">
+              <svg class="btn-svg" viewBox="0 0 340 112" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <defs>
+                  <linearGradient id="stoneG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A3AA9E"/><stop offset="50%" stop-color="#838B7E"/><stop offset="100%" stop-color="#676F62"/></linearGradient>
+                  <linearGradient id="stoneEdge" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#E1E7D8"/><stop offset="50%" stop-color="#8D967F"/><stop offset="100%" stop-color="#CBD4C1"/></linearGradient>
+                  <filter id="stoneShadow" x="-20%" y="-30%" width="140%" height="180%"><feDropShadow dx="0" dy="10" stdDeviation="8" flood-color="#0E120C" flood-opacity="0.42"/></filter>
+                </defs>
+                <g filter="url(#stoneShadow)">
+                  <path d="M34 14 L306 14 L328 36 L328 76 L306 98 L34 98 L12 76 L12 36 Z" fill="url(#stoneG)" stroke="url(#stoneEdge)" stroke-width="3.5"/>
+                  <path d="M42 22 L298 22 L316 40 L316 72 L298 90 L42 90 L24 72 L24 40 Z" fill="none" stroke="#4D5548" stroke-opacity="0.4" stroke-width="2"/>
+                  <g stroke="#4A5245" stroke-opacity="0.28" stroke-width="2" fill="none"><path d="M58 34h224M58 78h224" stroke-opacity="0.2"/><path d="M72 34l-10 10M268 34l10 10M72 78l-10-10M268 78l10-10"/></g>
+                  <path d="M170 30L182 48L170 78L158 48Z" fill="#CFE3C0" opacity="0.22" stroke="#DCECD0" stroke-opacity="0.35"/>
+                </g>
+                <rect class="hover-glow" x="18" y="18" width="304" height="76" rx="10" fill="#DFF0C8" opacity="0.08"/>
+              </svg>
+              <span class="btn-label">Достижения</span>
+            </button>
+          </nav>
           <button class="home-theme-btn" id="homeThemeBtn" aria-label="Сменить тему">🎨 Тема</button>
         </div>
 
