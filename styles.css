@@ -464,13 +464,13 @@ body:has(#screen-home.active) #app { padding: 0; max-width: none; }
 .npc-companion.hidden { opacity: 0; transform: translateY(20px) scale(.96); }
 .npc-sprite {
   width: 100%; height: auto; display: block;
-  filter: drop-shadow(0 18px 28px rgba(0,0,0,.35)) drop-shadow(0 0 24px rgba(255,220,140,.18));
+  filter: drop-shadow(0 10px 18px rgba(0,0,0,.28));
   transform-origin: 50% 85%;
   animation: npcBreathe 4.8s ease-in-out infinite;
 }
 .npc-shadow {
   width: 62%; height: 18px; margin-top: -8px; border-radius: 50%;
-  background: transparent, transparent 68%);
+  background: radial-gradient(ellipse at center, rgba(0,0,0,.28), transparent 68%);
   animation: npcShadow 4.8s ease-in-out infinite;
 }
 .npc-bubble {
