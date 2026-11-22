@@ -480,7 +480,7 @@ body:has(#screen-game.active) #app { padding: 0; max-width: none; }
 body:has(#screen-home.active) .topbar { display: none; }
 body:has(#screen-home.active) #app { padding: 0; max-width: none; }
 #screen-home.active { position: relative; min-height: 100svh; overflow: hidden; }
-.home-stage { position: relative; z-index: 2; min-height: 100svh; display: flex; flex-direction: column; justify-content: space-between; padding: 48px 24px calc(28px + env(safe-area-inset-bottom)); }
+.home-stage { position: relative; z-index: 5; min-height: 100svh; display: flex; flex-direction: column; justify-content: space-between; padding: 48px 24px calc(28px + env(safe-area-inset-bottom)); }
 .home-title-wrap, .menu-header {
   text-align: center; width: 100%; max-width: 980px; margin: 0 auto; padding: 10px 16px;
   display: flex; flex-direction: column; align-items: center; gap: 10px;
@@ -505,22 +505,48 @@ body:has(#screen-home.active) #app { padding: 0; max-width: none; }
 .path-sparkle { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: rgba(255,245,180,0.95); box-shadow: 0 0 8px 2px rgba(255,220,100,0.8); animation: pathSparkleFloat var(--pd,3s) ease-in-out infinite; opacity: 0; }
 @keyframes pathSparkleFloat { 0%{ opacity:0; transform: translateY(12px) scale(0.5); } 25%{ opacity:0.9; } 75%{ opacity:0.6; } 100%{ opacity:0; transform: translateY(-28px) scale(1); } }
 
-.menu-buttons { display: flex; justify-content: center; align-items: center; gap: 20px; flex-wrap: wrap; padding: 16px 10px 0; position: relative; z-index: 6; }
+.menu-buttons {
+  display: flex; justify-content: center; align-items: center;
+  gap: clamp(16px, 4vw, 52px); flex-wrap: wrap;
+  padding: 16px 10px 0; position: relative; z-index: 6;
+  width: 100%; max-width: 960px; margin: 0 auto;
+}
 .menu-btn {
-  padding: 20px 40px; font-size: 1.5rem; font-family: "Cinzel Decorative", "Cinzel", "Times New Roman", serif;
-  font-weight: 700; border: none; cursor: pointer; border-radius: 50px;
-  transition: all 0.3s ease; position: relative; overflow: hidden; color: #fffdfa;
+  font-family: "Cinzel Decorative", "Cinzel", "Times New Roman", serif;
+  font-weight: 700; border: none; cursor: pointer;
+  transition: transform 0.25s ease, filter 0.25s ease, box-shadow 0.25s ease;
+  position: relative; letter-spacing: 1px; text-align: center;
 }
+/* Center golden hexagon button — «В путь» */
 .menu-btn-primary {
-  background: linear-gradient(145deg, #2a5a2a, #4a8a4a);
-  color: #fffdfa; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); border: 2px solid #ffd700;
+  padding: 22px 62px; font-size: 1.6rem; color: #5b3a12;
+  border: 4px solid transparent; border-radius: 4px;
+  clip-path: polygon(14% 0%, 86% 0%, 100% 50%, 86% 100%, 14% 100%, 0% 50%);
+  background:
+    linear-gradient(180deg, #fff8e4 0%, #f7dfa0 55%, #efd089 100%) padding-box,
+    linear-gradient(180deg, #ffe9a8 0%, #d9a13f 55%, #b87f28 100%) border-box;
+  transform: translateY(-8px);
+  filter: drop-shadow(0 10px 22px rgba(180, 120, 30, 0.45));
 }
-.menu-btn-primary:hover { transform: scale(1.05); box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); background: linear-gradient(145deg, #3a7a3a, #5aa55a); }
+.menu-btn-primary:hover { transform: translateY(-12px) scale(1.04); filter: drop-shadow(0 14px 30px rgba(255, 200, 80, 0.65)) brightness(1.05); }
+.menu-btn-primary:active { transform: translateY(-6px) scale(0.98); }
+/* Side plaques */
 .menu-btn-secondary {
-  background: rgba(100, 80, 60, 0.8); color: #fffdfa;
-  border: 1px solid rgba(255, 255, 255, 0.3); backdrop-filter: blur(5px);
+  padding: 16px 30px; font-size: 1.12rem; border-radius: 12px;
+  color: #fff8ec; border: 2px solid #c89a55;
+  background: linear-gradient(180deg, #7d5632 0%, #5d3c1f 60%, #4a2f17 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 226, 170, 0.45), inset 0 -3px 8px rgba(0, 0, 0, 0.35), 0 8px 18px rgba(10, 5, 20, 0.45);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
 }
-.menu-btn-secondary:hover { background: rgba(130, 100, 80, 0.9); box-shadow: 0 0 15px rgba(255, 255, 255, 0.3); }
+.menu-btn-secondary:hover { transform: translateY(-4px); filter: brightness(1.12); box-shadow: inset 0 1px 0 rgba(255, 226, 170, 0.55), inset 0 -3px 8px rgba(0, 0, 0, 0.35), 0 12px 24px rgba(10, 5, 20, 0.55), 0 0 16px rgba(255, 210, 130, 0.25); }
+.menu-btn-secondary:active { transform: translateY(-1px) scale(0.98); }
+/* Silver plaque — «Достижения» */
+#navAchievementsBtn {
+  border-color: #e3e7ec;
+  background: linear-gradient(180deg, #b2b8c0 0%, #8a9099 60%, #767d87 100%);
+  color: #fdfdff;
+}
+#navAchievementsBtn:hover { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), inset 0 -3px 8px rgba(0, 0, 0, 0.28), 0 12px 24px rgba(10, 5, 20, 0.55), 0 0 16px rgba(220, 232, 255, 0.3); }
 
 .home-theme-btn { position: absolute; top: 18px; right: 18px; z-index: 6; padding: 10px 14px; border-radius: 14px; font-weight: 800; font-size: 0.9rem; background: rgba(50, 30, 85, 0.7); border: 1px solid rgba(255,255,255,0.2); color: var(--text); backdrop-filter: blur(8px); box-shadow: 0 6px 16px rgba(20,10,45,0.25); }
 .home-theme-btn:hover { background: rgba(70, 45, 115, 0.8); transform: translateY(-1px); }
@@ -574,7 +600,8 @@ body:has(#screen-home.active) #app { padding: 0; max-width: none; }
   .menu-title { font-size: clamp(2.2rem, 10vw, 3.2rem); padding: 0 12px; }
   .menu-subtitle { font-size: 1rem; max-width: 34ch; }
   .menu-buttons { gap: 12px; }
-  .menu-btn { padding: 16px 28px; font-size: 1.2rem; }
+  .menu-btn-secondary { padding: 14px 22px; font-size: 1rem; }
+  .menu-btn-primary { padding: 18px 44px; font-size: 1.35rem; }
   .heroine-layer { width: min(42vw, 300px); opacity: 0.95; }
   .heroine-speech { left: 58%; top: 14%; max-width: 190px; font-size: 0.84rem; }
 }
@@ -583,8 +610,10 @@ body:has(#screen-home.active) #app { padding: 0; max-width: none; }
   .home-stage { justify-content: flex-start; gap: 20px; padding-top: 40px; }
   .home-title-wrap { margin-top: 0; }
   .menu-buttons { margin-top: auto; flex-direction: column; align-items: center; gap: 14px; width: 100%; }
-  .menu-btn { width: min(320px, 84vw); padding: 16px 24px; font-size: 1.2rem; }
-  .menu-btn-primary { order: -1; }
+  .menu-btn { width: min(320px, 84vw); }
+  .menu-btn-secondary { padding: 15px 24px; font-size: 1.05rem; }
+  .menu-btn-primary { order: -1; padding: 18px 40px; font-size: 1.3rem; transform: none; }
+  .menu-btn-primary:hover { transform: scale(1.03); }
   .heroine-layer { width: min(52vw, 240px); left: -8px; bottom: 115px; z-index: 4; }
   .heroine-speech { left: 60%; top: 10%; max-width: 150px; font-size: 0.78rem; padding: 8px 10px; }
 }
