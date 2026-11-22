@@ -19,13 +19,7 @@
       <div class="forest-fireflies" id="bgSparkles"></div>
     </div>
 
-    <div class="npc-companion" id="npcCompanion" aria-hidden="true">
-      <div class="npc-bubble" id="npcBubble">Добро пожаловать в Сказочный Сад!</div>
-      <img class="npc-sprite" src="./assets/npc.png" alt="" />
-      <div class="npc-shadow"></div>
-    </div>
-
-    <header class="topbar">
+    <header class="topbar" id="topbar">
       <div class="brand" id="homeBtn" role="button" tabindex="0" aria-label="На главную">
         <span class="brand-icon">✦</span>
         <div>
@@ -43,64 +37,63 @@
     </header>
 
     <main class="screen-wrap">
-      <!-- MAP / STORY SCREEN -->
-      <section id="screen-map" class="screen active">
-        <div class="panel hero-panel">
-          <div class="hero-copy">
+      <!-- HOME -->
+      <section id="screen-home" class="screen active">
+        <div class="home-hero">
+          <div class="home-copy">
             <p class="eyebrow">Сказочная долина</p>
-            <h1>Верни свет в Сад Чудес</h1>
-            <p class="hero-text" id="storyIntro">
-              Туман Серых Шёпотов укрыл волшебный сад. Проходи уровни 3 в ряд, собирай звёзды и возвращай саду жизнь.
-            </p>
-          </div>
-          <div class="hero-progress">
-            <div class="progress-card">
-              <div class="progress-label">Прогресс истории</div>
-              <div class="progress-bar"><div class="progress-fill" id="storyProgressFill"></div></div>
-              <div class="progress-meta"><span id="storyProgressText">0%</span><span id="levelProgressText">0/0 уровней</span></div>
+            <h1>Верни свет<br>в волшебные земли</h1>
+            <p class="hero-text" id="storyIntro">Туман Серых Шёпотов накрыл волшебные земли. Помоги фее Люмине: проходи уровни 3 в ряд, собирай звёзды и восстанавливай сады, лес, озеро и небесный замок.</p>
+            <div class="home-actions">
+              <button class="btn btn-primary home-btn" id="navPlayBtn">В путь</button>
+              <button class="btn btn-secondary home-btn" id="navForestBtn">Сказочный мир</button>
+              <button class="btn btn-ghost home-btn" id="navAchievementsBtn">Продолжить</button>
             </div>
+          </div>
+          <div class="home-heroine">
+            <div class="heroine-glow"></div>
+            <img src="./img/npc.png" alt="Фея Люмина" class="heroine-img">
           </div>
         </div>
+      </section>
 
-        <div class="map-layout">
-          <div class="panel map-panel">
-            <div class="panel-head">
-              <h2>Карта приключения</h2>
-              <div class="muted">Выбирай уровень</div>
+      <!-- PATH / LEVELS -->
+      <section id="screen-path" class="screen">
+        <div class="panel path-panel">
+          <div class="panel-head path-head">
+            <div>
+              <p class="eyebrow">Тропинка приключений</p>
+              <h2>В путь</h2>
             </div>
-            <div id="levelMap" class="level-map"></div>
+            <button class="btn btn-ghost" id="pathBackBtn">← На главную</button>
           </div>
+          <div class="path-progress">
+            <div class="progress-bar"><div class="progress-fill" id="storyProgressFill"></div></div>
+            <div class="progress-meta"><span id="storyProgressText">0%</span><span id="levelProgressText">0/0 уровней</span></div>
+          </div>
+          <div id="levelMap" class="level-map"></div>
+        </div>
+      </section>
 
-          <div class="panel world-panel">
-            <div class="panel-head">
+      <!-- WORLD / GARDENS -->
+      <section id="screen-world" class="screen">
+        <div class="panel world-panel-full">
+          <div class="panel-head path-head">
+            <div>
+              <p class="eyebrow">Сказочный мир</p>
               <h2 id="gardenTitle">Сад Чудес</h2>
-              <div class="muted">Трать звёзды на волшебство</div>
             </div>
-            <div id="gardenTabs" class="garden-tabs"></div>
-            <p id="gardenStory" class="garden-story"></p>
-            <div class="world-scene" id="worldScene">
-              <div class="world-ground"></div>
-              <div class="world-items" id="worldItems"></div>
-              <div class="world-mist" id="worldMist"></div>
-            </div>
-            <div id="upgradeList" class="upgrade-list"></div>
+            <button class="btn btn-ghost" id="worldBackBtn">← На главную</button>
           </div>
+          <div id="gardenTabs" class="garden-tabs"></div>
+          <p id="gardenStory" class="garden-story"></p>
+          <div class="world-scene world-scene-large" id="worldScene">
+            <div class="world-ground"></div>
+            <div class="world-items" id="worldItems"></div>
+            <div class="world-mist" id="worldMist"></div>
+          </div>
+          <div id="upgradeList" class="upgrade-list"></div>
         </div>
-        <nav class="main-nav" aria-label="Главная навигация">
-          <button class="nav-orb nav-orb-side" id="navForestBtn" type="button">
-            <span class="nav-orb-icon">🌲</span>
-            <span class="nav-orb-label">Сказочный лес</span>
-          </button>
-          <button class="nav-orb nav-orb-main" id="navPlayBtn" type="button">
-            <span class="nav-orb-ring"></span>
-            <span class="nav-orb-icon">✦</span>
-            <span class="nav-orb-label">В путь</span>
-          </button>
-          <button class="nav-orb nav-orb-side" id="navAchievementsBtn" type="button">
-            <span class="nav-orb-icon">🏆</span>
-            <span class="nav-orb-label">Достижения</span>
-          </button>
-        </nav>
       </section>
 
       <!-- GAME SCREEN -->

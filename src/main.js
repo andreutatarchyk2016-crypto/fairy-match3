@@ -48,9 +48,11 @@ function showScreen(name) {
   $(`#screen-${name}`).classList.add("active");
 }
 
-$("#homeBtn").addEventListener("click", () => { showScreen("map"); renderMap(); });
-$("#homeBtn").addEventListener("keydown", (e) => { if (e.key === "Enter") { showScreen("map"); renderMap(); } });
-$("#backToMapBtn").addEventListener("click", () => { showScreen("map"); renderMap(); });
+$("#homeBtn").addEventListener("click", () => { showScreen("home"); renderMap(); });
+$("#homeBtn").addEventListener("keydown", (e) => { if (e.key === "Enter") { showScreen("home"); renderMap(); } });
+$("#backToMapBtn").addEventListener("click", () => { showScreen("path"); renderMap(); });
+$("#pathBackBtn")?.addEventListener("click", () => { showScreen("home"); });
+$("#worldBackBtn")?.addEventListener("click", () => { showScreen("home"); });
 $("#restartBtn").addEventListener("click", () => { if (currentLevelId) startLevel(currentLevelId); });
 $("#soundBtn").addEventListener("click", () => {
   soundEnabled = !soundEnabled;
@@ -68,41 +70,9 @@ function nextPlayableLevel() {
   return LEVELS[LEVELS.length - 1].id;
 }
 
-function showAchievementsModal() {
-  ensureAudio();
-  const totalStars = totalStarsEarned(state);
-  const completed = LEVELS.filter((l) => (state.starsEarned[l.id] || 0) > 0).length;
-  const perfect = LEVELS.filter((l) => (state.starsEarned[l.id] || 0) === 3).length;
-  const built = state.upgradesBuilt.length;
-  $("#confetti").innerHTML = "";
-  $("#modalStars").innerHTML = "🏆";
-  $("#modalTitle").textContent = "Достижения";
-  $("#modalText").textContent = "Твои волшебные успехи в Сказочном Саду.";
-  $("#modalReward").innerHTML = `
-    <div style="display:grid;gap:10px;text-align:left;color:var(--text);font-size:.98rem">
-      <div>★ Звёзд собрано: <strong style="color:var(--gold)">${totalStars}</strong></div>
-      <div>🌿 Уровней пройдено: <strong>${completed}/${LEVELS.length}</strong></div>
-      <div>✨ Идеальных уровней: <strong>${perfect}</strong></div>
-      <div>🏡 Построек в саду: <strong>${built}/${UPGRADES.length}</strong></div>
-    </div>`;
-  const actions = $("#modalActions");
-  actions.innerHTML = "";
-  const closeBtn = document.createElement("button");
-  closeBtn.className = "btn btn-primary";
-  closeBtn.textContent = "Круто!";
-  closeBtn.addEventListener("click", hideModal);
-  actions.appendChild(closeBtn);
-  $("#modal").classList.remove("hidden");
-}
-
-$("#navPlayBtn")?.addEventListener("click", () => { ensureAudio(); showLevelBrief(nextPlayableLevel()); });
-$("#navForestBtn")?.addEventListener("click", () => {
-  ensureAudio();
-  document.querySelector(".world-panel")?.scrollIntoView({ behavior: "smooth", block: "center" });
-  const bubble = $("#npcBubble");
-  if (bubble) { bubble.textContent = "Это Сказочный лес! Восстанавливай сад звёздами ✨"; }
-});
-$("#navAchievementsBtn")?.addEventListener("click", showAchievementsModal);
+$("#navPlayBtn")?.addEventListener("click", () => { ensureAudio(); renderMap(); showScreen("path"); });
+$("#navForestBtn")?.addEventListener("click", () => { ensureAudio(); renderMap(); showScreen("world"); });
+$("#navAchievementsBtn")?.addEventListener("click", () => { ensureAudio(); showLevelBrief(nextPlayableLevel()); });
 
 // ---------- Visual FX ----------
 function initSparkles() {
@@ -297,7 +267,11 @@ function renderWorld() {
   }
 
   const scene = $("#worldScene");
-  scene.style.background = `linear-gradient(180deg, ${garden.scene.sky[0]} 0%, ${garden.scene.sky[1]} 35%, ${garden.scene.ground[0]} 35%, ${garden.scene.ground[1]} 100%)`;
+  if (garden.scene.bg) {
+    scene.style.background = `url('${garden.scene.bg}') center/cover no-repeat`;
+  } else {
+    scene.style.background = `linear-gradient(180deg, ${garden.scene.sky[0]} 0%, ${garden.scene.sky[1]} 35%, ${garden.scene.ground[0]} 35%, ${garden.scene.ground[1]} 100%)`;
+  }
   const items = $("#worldItems");
   items.innerHTML = "";
   for (const u of garden.upgrades) {
@@ -562,8 +536,8 @@ function showEndModal(snap) {
 
   const mapBtn = document.createElement("button");
   mapBtn.className = "btn btn-ghost";
-  mapBtn.textContent = "К карте";
-  mapBtn.addEventListener("click", () => { hideModal(); showScreen("map"); renderMap(); });
+  mapBtn.textContent = "К уровням";
+  mapBtn.addEventListener("click", () => { hideModal(); showScreen("path"); renderMap(); });
 
   actions.appendChild(retryBtn);
   if (won) {
@@ -578,7 +552,7 @@ function showEndModal(snap) {
       const doneBtn = document.createElement("button");
       doneBtn.className = "btn btn-primary";
       doneBtn.textContent = "К саду";
-      doneBtn.addEventListener("click", () => { hideModal(); showScreen("map"); renderMap(); });
+      doneBtn.addEventListener("click", () => { hideModal(); showScreen("world"); renderMap(); });
       actions.appendChild(doneBtn);
     }
   } else {
@@ -594,4 +568,4 @@ $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") { /*
 // ---------- Init ----------
 initSparkles();
 renderMap();
-showScreen("map");
+showScreen("home");

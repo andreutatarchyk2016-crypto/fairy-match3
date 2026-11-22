@@ -27,7 +27,7 @@ const GARDEN_DEFS = [
     name: "Зачарованный Лес",
     short: "Лес",
     story: "За садом темнеет древний лес. Духи тишины уснули — разбуди их светом звёзд.",
-    scene: { sky: ["#2d5a7b", "#6b9fc9"], ground: ["#7ec47a", "#2d6b3f"], mist: "rgba(120,150,180,0.5)" },
+    scene: { sky: ["#2d5a7b", "#6b9fc9"], ground: ["#7ec47a", "#2d6b3f"], mist: "rgba(120,150,180,0.5)", bg: "./img/forest-bg.webp" },
     upgrades: [
       { id: "mushrooms", name: "Грибная поляна",  desc: "Светящиеся грибы освещают тропинку.", cost: 3, icon: "🍄", sceneStyle: { left: "10%", bottom: "16%", fontSize: "2.2rem" } },
       { id: "fireflies", name: "Светлячки",       desc: "Рой светлячков возвращает лесу волшебство.", cost: 3, icon: "✨", sceneStyle: { left: "55%", top: "24%", fontSize: "2rem" } },
