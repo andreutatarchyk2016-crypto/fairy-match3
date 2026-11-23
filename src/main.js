@@ -531,7 +531,11 @@ function renderWorld() {
         if (buildUpgrade(state, u.id, UPGRADES)) {
           sfxBuy();
           saveState(state);
+          // keep the currently viewed garden after re-render
+          const keepGarden = selectedGardenId;
           renderMap();
+          selectedGardenId = keepGarden;
+          renderWorld();
         } else {
           // show quick feedback
           el.classList.add("is-denied");
