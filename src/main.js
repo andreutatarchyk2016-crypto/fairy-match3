@@ -406,6 +406,50 @@ function renderMap() {
   applyWorldProgression();
 }
 
+function showUpgradeModal(upgrade, garden) {
+  const built = new Set(state.upgradesBuilt).has(upgrade.id);
+  const bank = starBank(state, UPGRADES);
+  const canBuy = !built && bank >= upgrade.cost;
+
+  $("#modalStars").innerHTML = `<span class="modal-icon">${upgrade.icon || "✨"}</span>`;
+  $("#modalTitle").textContent = upgrade.name;
+  $("#modalText").textContent = upgrade.desc || "";
+  $("#modalReward").innerHTML = built
+    ? `<div class="modal-reward-built">✨ Уже открыто в «${garden.short}»</div>`
+    : `<div>Стоимость: ★ ${upgrade.cost}</div><div style="margin-top:4px;color:var(--muted);font-size:0.9rem">У вас: ★ ${bank}</div>`;
+
+  const actions = $("#modalActions");
+  actions.innerHTML = "";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "btn btn-secondary";
+  closeBtn.textContent = built ? "Закрыть" : "Позже";
+  closeBtn.addEventListener("click", hideModal);
+  actions.appendChild(closeBtn);
+
+  if (!built) {
+    const buyBtn = document.createElement("button");
+    buyBtn.className = "btn btn-primary" + (canBuy ? "" : " btn-disabled");
+    buyBtn.textContent = canBuy ? `Купить за ★ ${upgrade.cost}` : "Не хватает звёзд";
+    buyBtn.disabled = !canBuy;
+    buyBtn.addEventListener("click", () => {
+      ensureAudio();
+      if (buildUpgrade(state, upgrade.id, UPGRADES)) {
+        sfxBuy();
+        saveState(state);
+        hideModal();
+        const keepGarden = selectedGardenId;
+        renderMap();
+        selectedGardenId = keepGarden;
+        renderWorld();
+      }
+    });
+    actions.appendChild(buyBtn);
+  }
+
+  $("#modal").classList.remove("hidden");
+}
+
 function renderWorld() {
   const builtSet = new Set(state.upgradesBuilt);
   const garden = GARDENS.find((g) => g.id === selectedGardenId) || GARDENS[0];
@@ -512,45 +556,20 @@ function renderWorld() {
     const canBuy = !built && bank >= u.cost;
     const el = document.createElement("button");
     el.type = "button";
-    el.className = "world-hotspot" + (built ? " is-built" : canBuy ? " is-available" : " is-locked");
+    el.className = "world-hotspot world-hotspot-pinonly" + (built ? " is-built" : canBuy ? " is-available" : " is-locked");
     const p = u.at ? { x: u.at.x, y: u.at.y } : hotspotPos(u.sceneStyle);
     el.classList.add("is-at");
-    el.dataset.baseLeft = `${p.x}%`;
-    el.dataset.baseTop = `${p.y}%`;
     el.style.left = `${p.x}%`;
     el.style.top = `${p.y}%`;
-    if (u.sceneStyle?.fontSize) el.style.fontSize = u.sceneStyle.fontSize;
-    el.innerHTML = `
-      <span class="hotspot-pin">${built ? "✓" : "★"}</span>
-      <span class="hotspot-label">
-        <span class="hotspot-name">${u.name}</span>
-        <span class="hotspot-cost">${built ? "Открыто" : `★ ${u.cost}`}</span>
-      </span>
-    `;
-    el.title = built ? `${u.name} — открыто` : `${u.name} — ${u.cost} ★`;
-    if (!built) {
-      el.addEventListener("click", () => {
-        ensureAudio();
-        if (buildUpgrade(state, u.id, UPGRADES)) {
-          sfxBuy();
-          saveState(state);
-          // keep the currently viewed garden after re-render
-          const keepGarden = selectedGardenId;
-          renderMap();
-          selectedGardenId = keepGarden;
-          renderWorld();
-        } else {
-          // show quick feedback
-          el.classList.add("is-denied");
-          setTimeout(() => el.classList.remove("is-denied"), 450);
-        }
-      });
-    }
+    el.innerHTML = `<span class="hotspot-pin">${built ? "✓" : u.icon || "★"}</span>`;
+    el.title = u.name;
+    el.setAttribute("aria-label", u.name);
+    el.addEventListener("click", () => {
+      ensureAudio();
+      showUpgradeModal(u, garden);
+    });
     items.appendChild(el);
   }
-
-  // Keep hotspot pills from overlapping each other or leaving the scene.
-  requestAnimationFrame(() => layoutHotspots(scene, items));
 }
 
 function layoutHotspots(scene, items) {
