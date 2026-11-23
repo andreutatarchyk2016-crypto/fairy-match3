@@ -148,7 +148,15 @@ function initHomePathSparkles() {
 function showScreen(name) {
   $$(".screen").forEach((s) => s.classList.remove("active"));
   $(`#screen-${name}`).classList.add("active");
+  if (name === "world") requestAnimationFrame(() => renderWorld());
 }
+
+let worldResizeTimer = 0;
+window.addEventListener("resize", () => {
+  if (!$("#screen-world").classList.contains("active")) return;
+  clearTimeout(worldResizeTimer);
+  worldResizeTimer = setTimeout(() => renderWorld(), 150);
+});
 
 $("#homeBtn").addEventListener("click", () => { showScreen("home"); renderMap(); });
 $("#homeBtn").addEventListener("keydown", (e) => { if (e.key === "Enter") { showScreen("home"); renderMap(); } });
@@ -426,6 +434,23 @@ function renderWorld() {
   const builtCount = garden.upgrades.filter((u) => builtSet.has(u.id)).length;
   const progress = totalUp ? builtCount / totalUp : 0;
 
+  // Scene box matches the background image aspect so nothing is cropped
+  // and image-space % coordinates (hotspots / reveal mask) align with objects.
+  scene.style.width = "";
+  scene.style.height = "";
+  scene.style.marginInline = "";
+  if (garden.scene.img && scene.clientWidth > 50) {
+    const [iw, ih] = garden.scene.img;
+    const avail = scene.clientWidth;
+    const maxH = 420;
+    let h = avail * (ih / iw);
+    let w = avail;
+    if (h > maxH) { h = maxH; w = maxH * (iw / ih); }
+    scene.style.width = `${Math.round(w)}px`;
+    scene.style.height = `${Math.round(h)}px`;
+    scene.style.marginInline = "auto";
+  }
+
   // layers
   if (garden.scene.bw && garden.scene.bg) {
     bwLayer.style.background = `url('${garden.scene.bw}') center/cover no-repeat`;
@@ -434,9 +459,11 @@ function renderWorld() {
     colorLayer.style.background = `url('${garden.scene.bg}') center/cover no-repeat`;
     colorLayer.style.opacity = "1";
     // reveal mask around built upgrades
-    const reveals = garden.upgrades.filter(u => builtSet.has(u.id)).map(u => {
-      const pos = hotspotPos(u.sceneStyle);
-      return `radial-gradient(circle at ${pos.x}% ${pos.y}%, black 0%, black 16%, rgba(0,0,0,0.92) 24%, transparent 34%)`;
+    const reveals = garden.upgrades.filter(u => builtSet.has(u.id)).flatMap(u => {
+      const pts = u.reveal || (u.at ? [{ x: u.at.x, y: u.at.y, rx: 18, ry: 18 }] : []);
+      return pts.map(p =>
+        `radial-gradient(ellipse ${p.rx}% ${p.ry}% at ${p.x}% ${p.y}%, #000 0%, #000 58%, rgba(0,0,0,0.85) 70%, transparent 86%)`
+      );
     });
     if (reveals.length === 0) {
       colorLayer.style.webkitMaskImage = "none";
@@ -483,7 +510,13 @@ function renderWorld() {
     const el = document.createElement("button");
     el.type = "button";
     el.className = "world-hotspot" + (built ? " is-built" : canBuy ? " is-available" : " is-locked");
-    Object.assign(el.style, u.sceneStyle);
+    const p = u.at ? { x: u.at.x, y: u.at.y } : hotspotPos(u.sceneStyle);
+    el.classList.add("is-at");
+    el.dataset.baseLeft = `${p.x}%`;
+    el.dataset.baseTop = `${p.y}%`;
+    el.style.left = `${p.x}%`;
+    el.style.top = `${p.y}%`;
+    if (u.sceneStyle?.fontSize) el.style.fontSize = u.sceneStyle.fontSize;
     el.innerHTML = `
       <span class="hotspot-pin">${built ? "✓" : "★"}</span>
       <span class="hotspot-label">
@@ -507,6 +540,48 @@ function renderWorld() {
       });
     }
     items.appendChild(el);
+  }
+
+  // Keep hotspot pills from overlapping each other or leaving the scene.
+  requestAnimationFrame(() => layoutHotspots(scene, items));
+}
+
+function layoutHotspots(scene, items) {
+  const sRect = scene.getBoundingClientRect();
+  if (sRect.width < 50 || sRect.height < 50) return;
+  const els = Array.from(items.querySelectorAll(".world-hotspot"));
+  const placed = [];
+  const STEP = 6;
+  for (const el of els) {
+    el.style.left = el.dataset.baseLeft;
+    el.style.top = el.dataset.baseTop;
+    const r0 = el.getBoundingClientRect();
+    const w = r0.width, h = r0.height;
+    const baseX = r0.left - sRect.left, baseY = r0.top - sRect.top;
+    const maxX = Math.ceil((w + 8) / STEP) * STEP;
+    const maxY = Math.ceil((2 * (h + 8)) / STEP) * STEP;
+    let best = null, bestScore = Infinity;
+    for (let dx = -maxX; dx <= maxX; dx += STEP) {
+      for (let dy = -maxY; dy <= maxY; dy += STEP) {
+        const x = baseX + dx, y = baseY + dy;
+        const out =
+          Math.max(0, -x) + Math.max(0, -y) +
+          Math.max(0, x + w - sRect.width) + Math.max(0, y + h - sRect.height);
+        let area = 0;
+        for (const p of placed) {
+          const ox = Math.min(x + w, p.x + p.w) - Math.max(x, p.x);
+          const oy = Math.min(y + h, p.y + p.h) - Math.max(y, p.y);
+          if (ox > 0 && oy > 0) area += ox * oy;
+        }
+        const dist = Math.hypot(dx, dy);
+        const score = out * 1000 + area * 8 + dist;
+        if (score < bestScore) { bestScore = score; best = [dx, dy]; }
+      }
+    }
+    if (!best) best = [0, 0];
+    el.style.left = `calc(${el.dataset.baseLeft} + ${best[0]}px)`;
+    el.style.top = `calc(${el.dataset.baseTop} + ${best[1]}px)`;
+    placed.push({ x: baseX + best[0], y: baseY + best[1], w, h });
   }
 }
 

@@ -261,6 +261,8 @@ body[data-theme="winter"] .forest-mist-a, body[data-theme="winter"] .forest-mist
   max-width: min(220px, 46vw); text-align: left;
 }
 .world-hotspot:hover { transform: scale(1.03); z-index: 2; }
+.world-hotspot.is-at { transform: translate(-25px, -50%); }
+.world-hotspot.is-at:hover { transform: translate(-25px, -50%) scale(1.03); }
 .world-hotspot.is-available { border-color: rgba(255,216,74,0.7); box-shadow: 0 0 0 2px rgba(255,216,74,0.15), 0 10px 24px rgba(20,10,45,0.35), 0 0 24px rgba(255,216,74,0.18); animation: hotspotPulse 2.4s ease-in-out infinite; }
 .world-hotspot.is-locked { filter: saturate(0.7) brightness(0.95); }
 .world-hotspot.is-built { border-color: rgba(126,232,199,0.55); background: rgba(35, 70, 60, 0.55); cursor: default; }
