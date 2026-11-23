@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=21";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=22";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=21";
-import { GameEngine, SIZE } from "./engine.js?v=21";
+} from "./state.js?v=22";
+import { GameEngine, SIZE } from "./engine.js?v=22";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -16,6 +16,7 @@ let endModalShown = false;
 let activeBooster = null; // 'hammer' | 'bomb' | 'shuffle'
 let boosterTarget = null; // {kind,r,c}
 let boosters = { hammer: 1, bomb: 1, shuffle: 1 };
+let shuffling = false;
 let selectedGardenId = GARDENS[0].id;
 let hintMove = null;
 let hintIdleTimer = null;
@@ -702,7 +703,29 @@ function setActiveBooster(kind) {
     boosterTarget = null;
     boosters.shuffle -= 1;
     updateBoosterUI();
-    engine.shuffleBoard().then(() => { renderBoard(engine.board, [], true); updateHUD(); });
+    shuffling = true;
+    const tiles = $$("#board .tile:not(.void)");
+    tiles.forEach((el, i) => {
+      const dx = (Math.random() - 0.5) * 40;
+      const dy = (Math.random() - 0.5) * 40;
+      el.style.setProperty("--sx", dx + "px");
+      el.style.setProperty("--sy", dy + "px");
+      el.style.animationDelay = (i % 8) * 0.02 + "s";
+      el.classList.add("shuffle-out");
+    });
+    setTimeout(async () => {
+      try {
+        await engine.shuffleBoard();
+      } finally {
+        shuffling = false;
+      }
+      renderBoard(engine.board, [], true);
+      $$("#board .tile:not(.void)").forEach((el, i) => {
+        el.classList.add("shuffle-in");
+        el.style.animationDelay = (i % 8) * 0.03 + "s";
+      });
+      updateHUD();
+    }, 450);
     return;
   }
   activeBooster = activeBooster === kind ? null : kind;
@@ -756,6 +779,7 @@ function startLevel(levelId) {
     },
     onClear: (board) => { renderBoard(board, []); },
     onRefill: (board, movements) => {
+      if (shuffling) return;
       const spawnSet = new Set((movements || []).map((m) => m.toR + "," + m.toC));
       renderBoard(board, [], spawnSet.size ? spawnSet : true);
       updateHUD();
