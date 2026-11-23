@@ -561,7 +561,7 @@ function renderWorld() {
     el.classList.add("is-at");
     el.style.left = `${p.x}%`;
     el.style.top = `${p.y}%`;
-    el.innerHTML = `<span class="hotspot-pin">${built ? "✓" : u.icon || "★"}</span>`;
+    el.innerHTML = `<span class="hotspot-pin">${built ? "✓" : "★"}</span>`;
     el.title = u.name;
     el.setAttribute("aria-label", u.name);
     el.addEventListener("click", () => {
