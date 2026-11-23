@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=19";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=20";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=19";
-import { GameEngine, SIZE } from "./engine.js?v=19";
+} from "./state.js?v=20";
+import { GameEngine, SIZE } from "./engine.js?v=20";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -921,6 +921,15 @@ function renderBoard(board, markedMatrix = [], spawn = false) {
       tile.addEventListener("click", onTileClick);
       boardEl.appendChild(tile);
     }
+  }
+  if (boosterTarget && boosterTarget.kind === "bomb") {
+    const r0 = Math.max(0, boosterTarget.r - 1), r1 = Math.min(SIZE - 1, boosterTarget.r + 1);
+    const c0 = Math.max(0, boosterTarget.c - 1), c1 = Math.min(SIZE - 1, boosterTarget.c + 1);
+    const outline = document.createElement("div");
+    outline.className = "booster-blast-outline";
+    outline.style.gridRow = `${r0 + 1} / ${r1 + 2}`;
+    outline.style.gridColumn = `${c0 + 1} / ${c1 + 2}`;
+    boardEl.appendChild(outline);
   }
 }
 
