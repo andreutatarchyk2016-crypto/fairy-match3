@@ -317,7 +317,8 @@ body:has(#screen-game.active) #app { padding: 0; max-width: none; }
 .booster-btn.is-active { border-color: rgba(255,216,74,0.95); box-shadow: 0 0 0 2px rgba(255,216,74,0.25), 0 0 18px rgba(255,216,74,0.35); background: rgba(80, 55, 20, 0.75); }
 .booster-btn.is-empty { opacity: 0.45; filter: grayscale(0.5); cursor: default; }
 .booster-btn.is-empty:hover { transform: none; border-color: rgba(255,255,255,0.18); }
-.booster-icon { line-height: 1; pointer-events: none; }
+.booster-icon { line-height: 1; pointer-events: none; display: grid; place-items: center; }
+.booster-icon img { width: 32px; height: 32px; display: block; border-radius: 8px; }
 .booster-count { position: absolute; right: -4px; bottom: -4px; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 999px; background: linear-gradient(180deg, #ffe27a, #ffb347); color: #3b2200; font-size: 0.72rem; font-weight: 900; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.35); }
 .booster-btn.is-empty .booster-count { background: rgba(120,120,140,0.8); color: #eee; }
 .hud-meta { font-size: 0.84rem; font-weight: 700; color: var(--muted); text-shadow: 0 1px 8px rgba(0,0,0,0.35); }

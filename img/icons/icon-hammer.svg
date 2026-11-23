@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0.2" y2="1">
+    <stop offset="0%" stop-color="#FFF7C9"/><stop offset="55%" stop-color="#FFF1B8"/><stop offset="100%" stop-color="#FFF6E3"/>
+  </linearGradient>
+  <radialGradient id="bgGlow" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/><stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="18" stdDeviation="12" flood-color="#5A5318" flood-opacity="0.24"/></filter>
+  <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#5A4412" flood-opacity="0.16"/></filter>
+  <filter id="blur10"><feGaussianBlur stdDeviation="10"/></filter>
+  <clipPath id="iconClip"><rect x="0" y="0" width="512" height="512" rx="108" ry="108"/></clipPath>
+  
+  <linearGradient id="wood" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#8B5A1B"/><stop offset="18%" stop-color="#C98A2E"/><stop offset="45%" stop-color="#E3B04B"/><stop offset="70%" stop-color="#C4872D"/><stop offset="100%" stop-color="#7A4E16"/></linearGradient>
+  <linearGradient id="woodHi" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFF0B0" stop-opacity="0.55"/><stop offset="100%" stop-color="#FFF0B0" stop-opacity="0"/></linearGradient>
+  <linearGradient id="metalTop" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="20%" stop-color="#E8EDF3"/><stop offset="55%" stop-color="#BFC9D6"/><stop offset="100%" stop-color="#98A4B5"/></linearGradient>
+  <linearGradient id="metalFace" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#F7FAFD"/><stop offset="30%" stop-color="#DDE4EC"/><stop offset="65%" stop-color="#AEB9C8"/><stop offset="100%" stop-color="#8895A6"/></linearGradient>
+  <linearGradient id="metalSide" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#CFD8E3"/><stop offset="100%" stop-color="#7D8999"/></linearGradient>
+  <linearGradient id="metalDark" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#B8C2CF"/><stop offset="100%" stop-color="#6E7B8C"/></linearGradient>
+
+</defs>
+<g clip-path="url(#iconClip)">
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#bgGlow)"/>
+  <g fill="#FFFFFF" opacity="0.45"><circle cx="72" cy="78" r="5"/><circle cx="442" cy="92" r="4"/><circle cx="418" cy="430" r="6"/><circle cx="96" cy="420" r="4"/></g>
+  <g stroke="#FFE6A8" stroke-width="4" stroke-linecap="round" opacity="0.45"><path d="M70 110 l0 18 M61 119 l18 0"/><path d="M430 390 l0 16 M422 398 l16 0"/></g>
+  <ellipse cx="270" cy="412" rx="150" ry="34" fill="#8A6A20" opacity="0.11" filter="url(#blur10)"/>
+  
+<g filter="url(#shadow)" transform="rotate(-28 256 250)">
+  <path d="M232 150 L280 150 L280 392 C280 405 269 416 256 416 C243 416 232 405 232 392 Z" fill="url(#wood)"/>
+  <g stroke="#6E4312" stroke-opacity="0.22" stroke-width="3" fill="none">
+    <path d="M238 180 C250 190 262 185 274 192"/><path d="M238 210 C250 220 262 215 274 222"/><path d="M238 240 C250 250 262 245 274 252"/><path d="M238 270 C250 280 262 275 274 282"/><path d="M238 300 C250 310 262 305 274 312"/><path d="M238 330 C250 340 262 335 274 342"/><path d="M238 360 C250 370 262 365 274 372"/>
+  </g>
+  <path d="M238 154 L252 154 L252 388 C252 396 246 402 245 402 C240 402 238 398 238 392 Z" fill="url(#woodHi)"/>
+  <path d="M232 386 C232 399 243 410 256 410 C269 410 280 399 280 386 L280 394 C280 407 269 418 256 418 C243 418 232 407 232 394 Z" fill="#6A4212" opacity="0.25"/>
+  <g filter="url(#softShadow)">
+    <path d="M126 116 L386 116 L404 136 L404 220 L386 240 L126 240 L108 220 L108 136 Z" fill="url(#metalSide)"/>
+    <path d="M126 106 L386 106 L404 126 L404 210 L386 230 L126 230 L108 210 L108 126 Z" fill="url(#metalFace)"/>
+    <path d="M126 106 L386 106 L404 126 L386 146 L126 146 L108 126 Z" fill="url(#metalTop)"/>
+    <path d="M134 114 L378 114 L394 130 L394 206 L378 222 L134 222 L118 206 L118 130 Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.45" stroke-width="3"/>
+    <path d="M126 146 L386 146" stroke="#7F8C9D" stroke-opacity="0.45" stroke-width="3"/>
+    <path d="M108 126 L126 106 L126 230 L108 210 Z" fill="#D7DEE7" opacity="0.95"/>
+    <path d="M404 126 L386 106 L386 230 L404 210 Z" fill="#99A7B8" opacity="0.95"/>
+    <path d="M136 112 L340 112 L352 124 L330 132 L150 132 Z" fill="#FFFFFF" opacity="0.55"/>
+    <path d="M126 106 L386 106" stroke="#FFFFFF" stroke-opacity="0.75" stroke-width="4" stroke-linecap="round"/>
+  </g>
+  <rect x="224" y="224" width="64" height="26" rx="8" fill="url(#metalDark)"/>
+  <rect x="228" y="228" width="56" height="8" rx="4" fill="#FFFFFF" opacity="0.25"/>
+</g>
+<g fill="#FFFFFF"><circle cx="344" cy="146" r="7" opacity="0.95"/><circle cx="358" cy="158" r="3.5" opacity="0.75"/><path d="M332 132 l4 10 l10 4 l-10 4 l-4 10 l-4 -10 l-10 -4 l10 -4 Z" opacity="0.9"/></g>
+
+</g></svg>

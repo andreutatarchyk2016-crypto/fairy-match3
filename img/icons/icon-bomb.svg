@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0.2" y2="1">
+    <stop offset="0%" stop-color="#FFF3C8"/><stop offset="55%" stop-color="#FFE9A8"/><stop offset="100%" stop-color="#FFF8E6"/>
+  </linearGradient>
+  <radialGradient id="bgGlow" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/><stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="18" stdDeviation="12" flood-color="#5A5318" flood-opacity="0.24"/></filter>
+  <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#5A4412" flood-opacity="0.16"/></filter>
+  <filter id="blur10"><feGaussianBlur stdDeviation="10"/></filter>
+  <clipPath id="iconClip"><rect x="0" y="0" width="512" height="512" rx="108" ry="108"/></clipPath>
+  
+  <radialGradient id="bombG" cx="35%" cy="30%" r="65%"><stop offset="0%" stop-color="#5A5A66"/><stop offset="35%" stop-color="#2A2A32"/><stop offset="100%" stop-color="#0D0D12"/></radialGradient>
+  <linearGradient id="fuse" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#D8B07A"/><stop offset="100%" stop-color="#8B6238"/></linearGradient>
+  <radialGradient id="flame" cx="50%" cy="60%" r="50%"><stop offset="0%" stop-color="#FFFAD0"/><stop offset="35%" stop-color="#FFD45A"/><stop offset="70%" stop-color="#FF8A2A"/><stop offset="100%" stop-color="#FF4A1A" stop-opacity="0"/></radialGradient>
+
+</defs>
+<g clip-path="url(#iconClip)">
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#bgGlow)"/>
+  <g fill="#FFFFFF" opacity="0.45"><circle cx="72" cy="78" r="5"/><circle cx="442" cy="92" r="4"/><circle cx="418" cy="430" r="6"/><circle cx="96" cy="420" r="4"/></g>
+  <g stroke="#FFE6A8" stroke-width="4" stroke-linecap="round" opacity="0.45"><path d="M70 110 l0 18 M61 119 l18 0"/><path d="M430 390 l0 16 M422 398 l16 0"/></g>
+  <ellipse cx="270" cy="412" rx="150" ry="34" fill="#8A6A20" opacity="0.11" filter="url(#blur10)"/>
+  
+<!-- side flash -->
+<g opacity="0.9">
+  <ellipse cx="360" cy="210" rx="90" ry="70" fill="#FFF3A0" opacity="0.18" filter="url(#blur10)"/>
+  <path d="M332 182 L402 150 L382 198 L442 210 L384 232 L406 286 L350 248 L324 304 L320 244 L270 228 L326 212 Z" fill="#FFE07A" opacity="0.55"/>
+  <path d="M342 194 L390 172 L376 206 L418 214 L378 228 L394 264 L354 238 L336 276 L334 234 L300 224 L338 214 Z" fill="#FFF7C8" opacity="0.8"/>
+</g>
+<g filter="url(#shadow)">
+  <circle cx="250" cy="290" r="132" fill="url(#bombG)"/>
+  <!-- yellow stripe -->
+  <path d="M142 255 C170 235,210 224,250 224 C290 224,330 235,358 255 L358 292 C330 272,290 261,250 261 C210 261,170 272,142 292 Z" fill="#FFD84A"/>
+  <path d="M142 255 C170 235,210 224,250 224 C290 224,330 235,358 255 L358 268 C330 248,290 237,250 237 C210 237,170 248,142 268 Z" fill="#FFF0A0" opacity="0.45"/>
+  <!-- highlight -->
+  <ellipse cx="205" cy="240" rx="52" ry="34" fill="#FFFFFF" opacity="0.14" transform="rotate(-20 205 240)"/>
+  <ellipse cx="190" cy="228" rx="28" ry="16" fill="#FFFFFF" opacity="0.18" transform="rotate(-20 190 228)"/>
+  <!-- fuse base -->
+  <rect x="232" y="150" width="36" height="34" rx="8" fill="#3A3A44"/>
+  <rect x="236" y="154" width="28" height="10" rx="4" fill="#6A6A78" opacity="0.45"/>
+  <!-- fuse -->
+  <path d="M250 152 C255 132,275 128,292 118 C308 109,322 96,332 82" fill="none" stroke="url(#fuse)" stroke-width="10" stroke-linecap="round"/>
+  <path d="M250 152 C255 132,275 128,292 118 C308 109,322 96,332 82" fill="none" stroke="#F0D0A0" stroke-opacity="0.35" stroke-width="4" stroke-linecap="round"/>
+  <!-- flame -->
+  <g transform="translate(332,82)">
+    <circle r="34" fill="url(#flame)" opacity="0.95"/>
+    <path d="M0 -28 C10 -16,18 -6,18 6 C18 20,10 30,0 34 C-10 30,-18 20,-18 6 C-18 -6,-10 -16,0 -28 Z" fill="#FFB02E"/>
+    <path d="M0 -18 C6 -10,11 -3,11 5 C11 14,6 21,0 24 C-6 21,-11 14,-11 5 C-11 -3,-6 -10,0 -18 Z" fill="#FFF4B0"/>
+    <circle cx="10" cy="-10" r="4" fill="#FFD86A" opacity="0.9"/>
+  </g>
+</g>
+
+</g></svg>

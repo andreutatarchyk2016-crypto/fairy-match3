@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="0.2" y2="1">
+    <stop offset="0%" stop-color="#E8FFF7"/><stop offset="55%" stop-color="#D7FFF1"/><stop offset="100%" stop-color="#FFFBEF"/>
+  </linearGradient>
+  <radialGradient id="bgGlow" cx="50%" cy="45%" r="55%"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/><stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/></radialGradient>
+  <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="18" stdDeviation="12" flood-color="#5A5318" flood-opacity="0.24"/></filter>
+  <filter id="softShadow" x="-30%" y="-30%" width="160%" height="180%"><feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#5A4412" flood-opacity="0.16"/></filter>
+  <filter id="blur10"><feGaussianBlur stdDeviation="10"/></filter>
+  <clipPath id="iconClip"><rect x="0" y="0" width="512" height="512" rx="108" ry="108"/></clipPath>
+  
+  <linearGradient id="arrowG" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#B8FFF4"/><stop offset="30%" stop-color="#5FE3D0"/><stop offset="70%" stop-color="#2EC4B6"/><stop offset="100%" stop-color="#1AA89C"/></linearGradient>
+  <linearGradient id="arrowEdge" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.8"/><stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/></linearGradient>
+  <radialGradient id="vortex" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/><stop offset="35%" stop-color="#A8FFF0" stop-opacity="0.35"/><stop offset="70%" stop-color="#4DD8C8" stop-opacity="0.18"/><stop offset="100%" stop-color="#2EC4B6" stop-opacity="0"/></radialGradient>
+
+</defs>
+<g clip-path="url(#iconClip)">
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#bgGlow)"/>
+  <g fill="#FFFFFF" opacity="0.45"><circle cx="72" cy="78" r="5"/><circle cx="442" cy="92" r="4"/><circle cx="418" cy="430" r="6"/><circle cx="96" cy="420" r="4"/></g>
+  <g stroke="#FFE6A8" stroke-width="4" stroke-linecap="round" opacity="0.45"><path d="M70 110 l0 18 M61 119 l18 0"/><path d="M430 390 l0 16 M422 398 l16 0"/></g>
+  <ellipse cx="270" cy="412" rx="150" ry="34" fill="#8A6A20" opacity="0.11" filter="url(#blur10)"/>
+  
+<g filter="url(#shadow)">
+  <!-- vortex -->
+  <g transform="translate(256,256)">
+    <circle r="92" fill="url(#vortex)"/>
+    <g fill="none" stroke-linecap="round">
+      <path d="M-70 0 C-70 -38,-38 -70,0 -70 C28 -70,50 -52,58 -28" stroke="#CFFFF7" stroke-opacity="0.55" stroke-width="8"/>
+      <path d="M70 0 C70 38,38 70,0 70 C-28 70,-50 52,-58 28" stroke="#B6FFF2" stroke-opacity="0.45" stroke-width="8"/>
+      <path d="M-48 -18 C-36 -42,-12 -56,14 -52 C40 -48,58 -26,58 0" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="5"/>
+      <path d="M48 18 C36 42,12 56,-14 52 C-40 48,-58 26,-58 0" stroke="#FFFFFF" stroke-opacity="0.28" stroke-width="5"/>
+    </g>
+    <g fill="#E8FFFB" opacity="0.8">
+      <circle cx="-28" cy="-36" r="4"/><circle cx="34" cy="30" r="3.5"/><circle cx="12" cy="-44" r="3"/><circle cx="-40" cy="24" r="2.8"/>
+    </g>
+  </g>
+  <!-- arrows -->
+  <g fill="url(#arrowG)" stroke="#EFFFFC" stroke-opacity="0.35" stroke-width="3">
+    <!-- top arrow curving right/down -->
+    <path d="M132 250 C132 170,190 112,270 112 C330 112,380 138,410 178 L438 154 L430 232 L354 214 L382 192 C360 166,324 150,282 150 C220 150 172 192 172 250 C172 266 175 282 181 296 L144 314 C136 294 132 272 132 250 Z"/>
+    <!-- bottom arrow curving left/up -->
+    <path d="M380 262 C380 330,332 388,270 388 C210 388,160 362,130 322 L102 346 L110 268 L186 286 L158 308 C180 334,216 350,258 350 C320 350 368 308 368 250 C368 234 365 218 359 204 L396 186 C404 206 408 228 408 250 C408 254 407 258 407 262 Z" transform="translate(-28,0)"/>
+  </g>
+  <!-- gloss -->
+  <g fill="url(#arrowEdge)" opacity="0.55">
+    <path d="M150 238 C155 182,198 132,270 128 C318 126,360 144,388 174 L370 188 C344 160 310 146 274 148 C214 151 176 194 172 244 Z"/>
+    <path d="M362 274 C357 330,314 380,242 384 C194 386,152 368,124 338 L142 324 C168 352 202 366 238 364 C298 361 336 318 340 268 Z"/>
+  </g>
+</g>
+
+</g></svg>
