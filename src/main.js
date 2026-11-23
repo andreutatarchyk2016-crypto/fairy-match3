@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=12";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=14";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=12";
-import { GameEngine, SIZE } from "./engine.js?v=12";
+} from "./state.js?v=14";
+import { GameEngine, SIZE } from "./engine.js?v=14";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -977,6 +977,7 @@ function setupSwipe() {
   boardEl.addEventListener("pointermove", async (e) => {
     if (!drag || drag.handled || e.pointerId !== drag.pointerId) return;
     if (!engine || engine.busy || engine.over || autoPlaying) return;
+    if (activeBooster === "hammer" || activeBooster === "bomb") return;
     const dx = e.clientX - drag.startX;
     const dy = e.clientY - drag.startY;
     if (Math.abs(dx) < THRESH && Math.abs(dy) < THRESH) return;
