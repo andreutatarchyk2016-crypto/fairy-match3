@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=23";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=24";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=23";
-import { GameEngine, SIZE } from "./engine.js?v=23";
+} from "./state.js?v=24";
+import { GameEngine, SIZE } from "./engine.js?v=24";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -897,6 +897,43 @@ function updateHUD() {
   }
 }
 
+function updateBoosterHighlight() {
+  const boardEl = $("#board");
+  if (!boardEl) return;
+  const wantBlast = new Set();
+  let wantTarget = null;
+  if (boosterTarget?.kind === "hammer") {
+    wantTarget = `${boosterTarget.r},${boosterTarget.c}`;
+  } else if (boosterTarget?.kind === "bomb") {
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const rr = boosterTarget.r + dr, cc = boosterTarget.c + dc;
+      if (rr < 0 || rr >= SIZE || cc < 0 || cc >= SIZE) continue;
+      const t = tileEl(rr, cc);
+      if (!t || t.classList.contains("void")) continue;
+      wantBlast.add(`${rr},${cc}`);
+    }
+    wantTarget = `${boosterTarget.r},${boosterTarget.c}`;
+  }
+  boardEl.querySelectorAll(".tile").forEach(el => {
+    const k = `${el.dataset.r},${el.dataset.c}`;
+    el.classList.toggle("booster-blast", wantBlast.has(k));
+    el.classList.toggle("booster-target", wantTarget === k);
+  });
+  const old = boardEl.querySelector(".booster-blast-outline");
+  if (boosterTarget?.kind === "bomb") {
+    const r0 = Math.max(0, boosterTarget.r - 1), r1 = Math.min(SIZE - 1, boosterTarget.r + 1);
+    const c0 = Math.max(0, boosterTarget.c - 1), c1 = Math.min(SIZE - 1, boosterTarget.c + 1);
+    const gr = `${r0 + 1} / ${r1 + 2}`, gc = `${c0 + 1} / ${c1 + 2}`;
+    if (old) { old.style.gridRow = gr; old.style.gridColumn = gc; }
+    else {
+      const outline = document.createElement("div");
+      outline.className = "booster-blast-outline";
+      outline.style.gridRow = gr; outline.style.gridColumn = gc;
+      boardEl.appendChild(outline);
+    }
+  } else if (old) old.remove();
+}
+
 function renderBoard(board, markedMatrix = [], spawn = false) {
   const boardEl = $("#board");
   boardEl.innerHTML = "";
@@ -981,7 +1018,7 @@ async function onTileClick(e) {
       updateHUD();
     } else {
       boosterTarget = { kind, r, c };
-      renderBoard(engine.board, []);
+      updateBoosterHighlight();
     }
     return;
   }
