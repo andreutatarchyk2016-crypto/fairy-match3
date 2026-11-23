@@ -1,4 +1,4 @@
-import { TILE_TYPES, BOARD_SHAPES } from "./data.js?v=20";
+import { TILE_TYPES, BOARD_SHAPES } from "./data.js?v=21";
 
 const SIZE = 8;
 const TYPES = TILE_TYPES.length;
@@ -267,7 +267,14 @@ export class GameEngine {
     if (this.busy || this.over) return false;
     if (!this.inBounds(r, c) || this.board[r][c] < 0) return false;
     this.busy = true;
+    const t = this.board[r][c];
+    if (t >= 0) {
+      this.collected[t] = (this.collected[t] || 0) + 1;
+      this.score += 20;
+    }
     this.board[r][c] = -1;
+    this.cb.onMatch?.({ marked: Array.from({ length: SIZE }, (_, rr) => Array.from({ length: SIZE }, (_, cc) => rr === r && cc === c)), cleared: 1, combo: 0, gain: 20, collected: { ...this.collected }, score: this.score });
+    await delay(200);
     this.cb.onClear?.(cloneBoard(this.board));
     await delay(120);
     const movements = this.applyGravityAndRefill();
@@ -285,12 +292,25 @@ export class GameEngine {
     if (!this.inBounds(r, c)) return false;
     this.busy = true;
     let clearedAny = false;
+    let cleared = 0;
+    const marked = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
     for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
       const nr = r + dr, nc = c + dc;
       if (!this.inBounds(nr, nc)) continue;
-      if (this.board[nr][nc] >= 0) { this.board[nr][nc] = -1; clearedAny = true; }
+      const t = this.board[nr][nc];
+      if (t >= 0) {
+        this.collected[t] = (this.collected[t] || 0) + 1;
+        this.board[nr][nc] = -1;
+        marked[nr][nc] = true;
+        clearedAny = true;
+        cleared++;
+      }
     }
     if (!clearedAny) { this.busy = false; return false; }
+    const gain = cleared * 20;
+    this.score += gain;
+    this.cb.onMatch?.({ marked, cleared, combo: 0, gain, collected: { ...this.collected }, score: this.score });
+    await delay(220);
     this.cb.onClear?.(cloneBoard(this.board));
     await delay(120);
     const movements = this.applyGravityAndRefill();
