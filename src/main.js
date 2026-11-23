@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=22";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=23";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=22";
-import { GameEngine, SIZE } from "./engine.js?v=22";
+} from "./state.js?v=23";
+import { GameEngine, SIZE } from "./engine.js?v=23";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -706,11 +706,11 @@ function setActiveBooster(kind) {
     shuffling = true;
     const tiles = $$("#board .tile:not(.void)");
     tiles.forEach((el, i) => {
-      const dx = (Math.random() - 0.5) * 40;
-      const dy = (Math.random() - 0.5) * 40;
+      const dx = (Math.random() - 0.5) * 26;
+      const dy = (Math.random() - 0.5) * 26;
       el.style.setProperty("--sx", dx + "px");
       el.style.setProperty("--sy", dy + "px");
-      el.style.animationDelay = (i % 8) * 0.02 + "s";
+      el.style.animationDelay = (i % 8) * 0.025 + "s";
       el.classList.add("shuffle-out");
     });
     setTimeout(async () => {
@@ -722,10 +722,10 @@ function setActiveBooster(kind) {
       renderBoard(engine.board, [], true);
       $$("#board .tile:not(.void)").forEach((el, i) => {
         el.classList.add("shuffle-in");
-        el.style.animationDelay = (i % 8) * 0.03 + "s";
+        el.style.animationDelay = (i % 8) * 0.035 + "s";
       });
       updateHUD();
-    }, 450);
+    }, 720);
     return;
   }
   activeBooster = activeBooster === kind ? null : kind;
