@@ -459,7 +459,8 @@ function renderWorld() {
     colorLayer.style.background = `url('${garden.scene.bg}') center/cover no-repeat`;
     colorLayer.style.opacity = "1";
     // reveal mask around built upgrades
-    const reveals = garden.upgrades.filter(u => builtSet.has(u.id)).flatMap(u => {
+    const builtUpgrades = garden.upgrades.filter(u => builtSet.has(u.id));
+    const reveals = builtUpgrades.flatMap(u => {
       const pts = u.reveal || (u.at ? [{ x: u.at.x, y: u.at.y, rx: 18, ry: 18 }] : []);
       return pts.map(p =>
         `radial-gradient(ellipse ${p.rx}% ${p.ry}% at ${p.x}% ${p.y}%, #000 0%, #000 58%, rgba(0,0,0,0.85) 70%, transparent 86%)`
@@ -469,7 +470,7 @@ function renderWorld() {
       colorLayer.style.webkitMaskImage = "none";
       colorLayer.style.maskImage = "none";
       colorLayer.style.opacity = "0";
-    } else if (reveals.length === totalUp) {
+    } else if (builtUpgrades.length === totalUp) {
       colorLayer.style.webkitMaskImage = "none";
       colorLayer.style.maskImage = "none";
       colorLayer.style.opacity = "1";
