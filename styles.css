@@ -312,13 +312,17 @@ body:has(#screen-game.active) #app { padding: 0; max-width: none; }
 .game-bottom > * { pointer-events: auto; }
 .game-bottom .stars-row { margin: 0; font-size: 1.5rem; }
 .booster-bar { display: flex; gap: 8px; align-items: center; }
-.booster-btn { position: relative; width: 46px; height: 46px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.18); background: rgba(45, 28, 80, 0.72); backdrop-filter: blur(8px); display: grid; place-items: center; font-size: 1.35rem; cursor: pointer; transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease, filter .15s ease; }
-.booster-btn:hover { transform: translateY(-2px); border-color: rgba(255,216,74,0.5); }
-.booster-btn.is-active { border-color: rgba(255,216,74,0.95); box-shadow: 0 0 0 2px rgba(255,216,74,0.25), 0 0 18px rgba(255,216,74,0.35); background: rgba(80, 55, 20, 0.75); }
+.booster-btn { position: relative; width: 54px; height: 54px; border-radius: 14px; border: none; background: transparent; backdrop-filter: none; display: grid; place-items: center; font-size: 1.35rem; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, filter .15s ease; }
+.booster-btn:hover { transform: translateY(-2px); }
+.booster-btn.is-active { box-shadow: 0 0 0 2px rgba(255,216,74,0.4), 0 0 18px rgba(255,216,74,0.35); background: rgba(80, 55, 20, 0.35); border-radius: 14px; }
 .booster-btn.is-empty { opacity: 0.45; filter: grayscale(0.5); cursor: default; }
-.booster-btn.is-empty:hover { transform: none; border-color: rgba(255,255,255,0.18); }
+.booster-btn.is-empty:hover { transform: none; }
 .booster-icon { line-height: 1; pointer-events: none; display: grid; place-items: center; }
-.booster-icon img { width: 32px; height: 32px; display: block; border-radius: 8px; }
+.booster-icon img { width: 42px; height: 42px; display: block; border-radius: 10px; animation: boosterFloat 3.2s ease-in-out infinite; }
+.booster-btn:nth-child(2) .booster-icon img { animation-delay: .4s; }
+.booster-btn:nth-child(3) .booster-icon img { animation-delay: .8s; }
+.booster-btn:hover .booster-icon img, .booster-btn.is-active .booster-icon img { animation-play-state: paused; }
+@keyframes boosterFloat { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
 .booster-count { position: absolute; right: -4px; bottom: -4px; min-width: 20px; height: 20px; padding: 0 4px; border-radius: 999px; background: linear-gradient(180deg, #ffe27a, #ffb347); color: #3b2200; font-size: 0.72rem; font-weight: 900; display: grid; place-items: center; border: 1px solid rgba(255,255,255,0.35); }
 .booster-btn.is-empty .booster-count { background: rgba(120,120,140,0.8); color: #eee; }
 .hud-meta { font-size: 0.84rem; font-weight: 700; color: var(--muted); text-shadow: 0 1px 8px rgba(0,0,0,0.35); }
