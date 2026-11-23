@@ -1,4 +1,4 @@
-import { TILE_TYPES } from "./data.js";
+import { TILE_TYPES, BOARD_SHAPES } from "./data.js?v=12";
 
 const SIZE = 8;
 const TYPES = TILE_TYPES.length;
@@ -11,14 +11,15 @@ function cloneBoard(board) {
   return board.map((row) => row.slice());
 }
 
-function createBoard() {
-  // Create board avoiding initial matches where possible
+function createBoard(mask) {
+  // Create board avoiding initial matches where possible; -2 = void
   const board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
+      if (mask && !mask[r][c]) { board[r][c] = -2; continue; }
       let type = randType();
       let guard = 0;
-      while (guard++ < 20 && createsInitialMatch(board, r, c, type)) {
+      while (guard++ < 20 && createsInitialMatch(board, r, c, type, mask)) {
         type = randType();
       }
       board[r][c] = type;
@@ -27,11 +28,12 @@ function createBoard() {
   return board;
 }
 
-function createsInitialMatch(board, r, c, type) {
+function createsInitialMatch(board, r, c, type, mask) {
+  const ok = (rr, cc) => rr >= 0 && rr < SIZE && cc >= 0 && cc < SIZE && (!mask || mask[rr][cc]) && board[rr][cc] === type;
   // horizontal
-  if (c >= 2 && board[r][c - 1] === type && board[r][c - 2] === type) return true;
+  if (ok(r, c - 1) && ok(r, c - 2)) return true;
   // vertical
-  if (r >= 2 && board[r - 1][c] === type && board[r - 2][c] === type) return true;
+  if (ok(r - 1, c) && ok(r - 2, c)) return true;
   return false;
 }
 
@@ -100,7 +102,8 @@ export class GameEngine {
   }
 
   reset() {
-    this.board = createBoard();
+    this.mask = BOARD_SHAPES[this.level.shape] || BOARD_SHAPES.full;
+    this.board = createBoard(this.mask);
     // Ensure no immediate matches (our generator tries, but be safe)
     this.resolveInitial();
     this.score = 0;
@@ -123,7 +126,7 @@ export class GameEngine {
     // hard guarantee
     let guard = 0;
     while (findMatches(this.board).any && guard++ < 50) {
-      this.board = createBoard();
+      this.board = createBoard(this.mask);
     }
   }
 
@@ -137,6 +140,7 @@ export class GameEngine {
     if (this.busy || this.over) return false;
     if (!this.inBounds(a.r, a.c) || !this.inBounds(b.r, b.c)) return false;
     if (!this.isAdjacent(a, b)) return false;
+    if (this.board[a.r][a.c] < 0 || this.board[b.r][b.c] < 0) return false;
     return true;
   }
 
@@ -208,16 +212,20 @@ export class GameEngine {
     for (let c = 0; c < SIZE; c++) {
       let write = SIZE - 1;
       for (let r = SIZE - 1; r >= 0; r--) {
-        if (this.board[r][c] >= 0) {
+        const v = this.board[r][c];
+        if (v === -2) { write = r - 1; continue; }
+        if (v >= 0) {
           if (write !== r) {
-            this.board[write][c] = this.board[r][c];
-            movements.push({ fromR: r, fromC: c, toR: write, toC: c, type: this.board[write][c], isNew: false });
+            this.board[write][c] = v;
+            movements.push({ fromR: r, fromC: c, toR: write, toC: c, type: v, isNew: false });
             this.board[r][c] = -1;
           }
           write--;
         }
       }
+      // fill empties above write, but stop at voids
       for (let r = write; r >= 0; r--) {
+        if (this.board[r][c] === -2) { write = r - 1; continue; }
         const type = randType();
         this.board[r][c] = type;
         movements.push({ fromR: -1 - (write - r), fromC: c, toR: r, toC: c, type, isNew: true });
@@ -253,6 +261,63 @@ export class GameEngine {
       this.over = true;
       this.won = goal.done;
     }
+  }
+
+  async activateHammer(r, c) {
+    if (this.busy || this.over) return false;
+    if (!this.inBounds(r, c) || this.board[r][c] < 0) return false;
+    this.busy = true;
+    this.board[r][c] = -1;
+    this.cb.onClear?.(cloneBoard(this.board));
+    await delay(120);
+    const movements = this.applyGravityAndRefill();
+    this.cb.onRefill?.(cloneBoard(this.board), movements);
+    await delay(280);
+    await this.resolveCascades();
+    this.checkEnd();
+    this.busy = false;
+    this.cb.onState?.(this.snapshot());
+    return true;
+  }
+
+  async activateBomb(r, c) {
+    if (this.busy || this.over) return false;
+    if (!this.inBounds(r, c)) return false;
+    this.busy = true;
+    let clearedAny = false;
+    for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+      const nr = r + dr, nc = c + dc;
+      if (!this.inBounds(nr, nc)) continue;
+      if (this.board[nr][nc] >= 0) { this.board[nr][nc] = -1; clearedAny = true; }
+    }
+    if (!clearedAny) { this.busy = false; return false; }
+    this.cb.onClear?.(cloneBoard(this.board));
+    await delay(120);
+    const movements = this.applyGravityAndRefill();
+    this.cb.onRefill?.(cloneBoard(this.board), movements);
+    await delay(280);
+    await this.resolveCascades();
+    this.checkEnd();
+    this.busy = false;
+    this.cb.onState?.(this.snapshot());
+    return true;
+  }
+
+  async shuffleBoard() {
+    if (this.busy || this.over) return false;
+    this.busy = true;
+    const cells = [];
+    for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) if (this.board[r][c] >= 0) cells.push({r,c});
+    const types = cells.map(p => this.board[p.r][p.c]);
+    for (let i = types.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [types[i],types[j]]=[types[j],types[i]]; }
+    cells.forEach((p, i) => { this.board[p.r][p.c] = types[i]; });
+    // avoid deadboard/no-match-stuck is ok; but avoid immediate matches? not necessary
+    this.resolveInitial();
+    this.cb.onRefill?.(cloneBoard(this.board), []);
+    await delay(200);
+    this.busy = false;
+    this.cb.onState?.(this.snapshot());
+    return true;
   }
 
   snapshot() {

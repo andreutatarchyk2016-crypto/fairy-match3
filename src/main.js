@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=12";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js";
-import { GameEngine, SIZE } from "./engine.js";
+} from "./state.js?v=12";
+import { GameEngine, SIZE } from "./engine.js?v=12";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -13,6 +13,8 @@ let engine = null;
 let selected = null; // {r,c}
 let currentLevelId = null;
 let endModalShown = false;
+let activeBooster = null; // 'hammer' | 'bomb' | 'shuffle'
+let boosters = { hammer: 1, bomb: 1, shuffle: 1 };
 let selectedGardenId = GARDENS[0].id;
 let hintMove = null;
 let hintIdleTimer = null;
@@ -635,8 +637,10 @@ function findValidMove(board) {
     return false;
   }
   for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+    if (board[r][c] < 0) continue;
     for (const [dr,dc] of [[1,0],[0,1]]) {
       const nr = r+dr, nc = c+dc; if (nr>=size||nc>=size) continue;
+      if (board[nr][nc] < 0) continue;
       const b = board.map(row => row.slice());
       [b[r][c], b[nr][nc]] = [b[nr][nc], b[r][c]];
       if (hasMatch(b)) return { a:{r,c}, b:{r:nr,c:nc} };
@@ -675,6 +679,41 @@ function scheduleIdleHint() {
 }
 $("#hintBtn")?.addEventListener("click", () => { ensureAudio(); showFairyHint("Люмина подсказывает: попробуй этот ход ✨"); });
 
+function updateBoosterUI() {
+  const map = { hammer: "boosterHammer", bomb: "boosterBomb", shuffle: "boosterShuffle" };
+  for (const [k, id] of Object.entries(map)) {
+    const btn = document.getElementById(id);
+    const count = document.getElementById(id + "Count");
+    if (!btn) continue;
+    const n = boosters[k] || 0;
+    btn.classList.toggle("is-active", activeBooster === k);
+    btn.classList.toggle("is-empty", n <= 0);
+    if (count) count.textContent = String(n);
+  }
+}
+
+function setActiveBooster(kind) {
+  if (!engine || engine.busy || engine.over) return;
+  if (!boosters[kind] || boosters[kind] <= 0) return;
+  if (kind === "shuffle") {
+    ensureAudio();
+    activeBooster = null;
+    boosters.shuffle -= 1;
+    updateBoosterUI();
+    engine.shuffleBoard().then(() => { renderBoard(engine.board, [], true); updateHUD(); });
+    return;
+  }
+  activeBooster = activeBooster === kind ? null : kind;
+  selected = null;
+  clearHint();
+  renderBoard(engine.board, []);
+  updateBoosterUI();
+}
+
+["hammer","bomb","shuffle"].forEach(kind => {
+  document.getElementById("booster" + kind[0].toUpperCase() + kind.slice(1))?.addEventListener("click", () => setActiveBooster(kind));
+});
+
 // ---------- Game ----------
 function startLevel(levelId) {
   const level = LEVELS.find((l) => l.id === levelId);
@@ -683,6 +722,9 @@ function startLevel(levelId) {
   selected = null;
   endModalShown = false;
   autoPlaying = false;
+  activeBooster = null;
+  boosters = { hammer: 1, bomb: 1, shuffle: 1 };
+  updateBoosterUI();
   const ov = $("#boardOverlay"); if (ov) { ov.textContent = ""; ov.classList.add("hidden"); }
   clearHint();
   hideModal();
@@ -757,8 +799,10 @@ function findBestMove(board) {
   const size = board.length;
   let best = null;
   for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
+    if (board[r][c] < 0) continue;
     for (const [dr,dc] of [[1,0],[0,1]]) {
       const nr = r+dr, nc = c+dc; if (nr>=size||nc>=size) continue;
+      if (board[nr][nc] < 0) continue;
       const b = board.map(row => row.slice());
       [b[r][c], b[nr][nc]] = [b[nr][nc], b[r][c]];
       const res = countMatchesOnBoard(b);
@@ -845,7 +889,12 @@ function renderBoard(board, markedMatrix = [], spawn = false) {
       if (markedMatrix[r] && markedMatrix[r][c]) tile.classList.add("matched");
       tile.dataset.r = String(r);
       tile.dataset.c = String(c);
-      if (t < 0) {
+      if (t === -2) {
+        tile.classList.add("void");
+        tile.dataset.type = "";
+        tile.innerHTML = "";
+        tile.disabled = true;
+      } else if (t < 0) {
         tile.classList.add("empty");
         tile.dataset.type = "";
         tile.innerHTML = "";
@@ -869,6 +918,19 @@ async function onTileClick(e) {
   const tile = e.currentTarget;
   const r = Number(tile.dataset.r);
   const c = Number(tile.dataset.c);
+
+  if (activeBooster === "hammer" || activeBooster === "bomb") {
+    if (engine.board[r][c] < 0) return;
+    const kind = activeBooster;
+    activeBooster = null;
+    boosters[kind] -= 1;
+    updateBoosterUI();
+    if (kind === "hammer") await engine.activateHammer(r, c);
+    else await engine.activateBomb(r, c);
+    renderBoard(engine.board, []);
+    updateHUD();
+    return;
+  }
 
   if (!selected) {
     selected = { r, c };
