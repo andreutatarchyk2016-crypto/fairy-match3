@@ -439,6 +439,7 @@ function renderWorld() {
   scene.style.width = "";
   scene.style.height = "";
   scene.style.marginInline = "";
+  scene.classList.remove("is-compact");
   if (garden.scene.img && scene.clientWidth > 50) {
     const [iw, ih] = garden.scene.img;
     const avail = scene.clientWidth;
@@ -450,6 +451,7 @@ function renderWorld() {
     scene.style.height = `${Math.round(h)}px`;
     scene.style.marginInline = "auto";
   }
+  scene.classList.toggle("is-compact", scene.clientWidth < 400);
 
   // layers
   if (garden.scene.bw && garden.scene.bg) {
@@ -556,37 +558,42 @@ function layoutHotspots(scene, items) {
   if (sRect.width < 50 || sRect.height < 50) return;
   const els = Array.from(items.querySelectorAll(".world-hotspot"));
   const placed = [];
-  const STEP = 6;
+  const STEP = 4;
+  const gap = 4;
   for (const el of els) {
     el.style.left = el.dataset.baseLeft;
     el.style.top = el.dataset.baseTop;
     const r0 = el.getBoundingClientRect();
     const w = r0.width, h = r0.height;
     const baseX = r0.left - sRect.left, baseY = r0.top - sRect.top;
-    const maxX = Math.ceil((w + 8) / STEP) * STEP;
-    const maxY = Math.ceil((2 * (h + 8)) / STEP) * STEP;
+    const maxX = Math.max(120, Math.ceil((w * 1.5) / STEP) * STEP);
+    const maxY = Math.max(160, Math.ceil((3 * (h + gap)) / STEP) * STEP);
     let best = null, bestScore = Infinity;
-    for (let dx = -maxX; dx <= maxX; dx += STEP) {
-      for (let dy = -maxY; dy <= maxY; dy += STEP) {
+    for (let dy = -maxY; dy <= maxY; dy += STEP) {
+      for (let dx = -maxX; dx <= maxX; dx += STEP) {
         const x = baseX + dx, y = baseY + dy;
         const out =
-          Math.max(0, -x) + Math.max(0, -y) +
-          Math.max(0, x + w - sRect.width) + Math.max(0, y + h - sRect.height);
-        let area = 0;
+          Math.max(0, 2 - x) + Math.max(0, 2 - y) +
+          Math.max(0, x + w - (sRect.width - 2)) + Math.max(0, y + h - (sRect.height - 2));
+        let overlap = 0;
         for (const p of placed) {
-          const ox = Math.min(x + w, p.x + p.w) - Math.max(x, p.x);
-          const oy = Math.min(y + h, p.y + p.h) - Math.max(y, p.y);
-          if (ox > 0 && oy > 0) area += ox * oy;
+          const ox = Math.min(x + w + gap, p.x + p.w + gap) - Math.max(x - gap, p.x - gap);
+          const oy = Math.min(y + h + gap, p.y + p.h + gap) - Math.max(y - gap, p.y - gap);
+          if (ox > 0 && oy > 0) overlap += ox * oy;
         }
-        const dist = Math.hypot(dx, dy);
-        const score = out * 1000 + area * 8 + dist;
-        if (score < bestScore) { bestScore = score; best = [dx, dy]; }
+        const dist = Math.abs(dx) * 0.8 + Math.abs(dy) * 0.6;
+        const score = out * 2000 + overlap * 12 + dist;
+        if (score < bestScore) { bestScore = score; best = [dx, dy]; if (score === 0) break; }
       }
+      if (bestScore === 0) break;
     }
     if (!best) best = [0, 0];
-    el.style.left = `calc(${el.dataset.baseLeft} + ${best[0]}px)`;
-    el.style.top = `calc(${el.dataset.baseTop} + ${best[1]}px)`;
-    placed.push({ x: baseX + best[0], y: baseY + best[1], w, h });
+    let fx = baseX + best[0], fy = baseY + best[1];
+    fx = Math.max(2, Math.min(sRect.width - w - 2, fx));
+    fy = Math.max(2, Math.min(sRect.height - h - 2, fy));
+    el.style.left = `calc(${el.dataset.baseLeft} + ${fx - baseX}px)`;
+    el.style.top = `calc(${el.dataset.baseTop} + ${fy - baseY}px)`;
+    placed.push({ x: fx, y: fy, w, h });
   }
 }
 

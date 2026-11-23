@@ -260,6 +260,10 @@ body[data-theme="winter"] .forest-mist-a, body[data-theme="winter"] .forest-mist
   transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease, filter .2s ease;
   max-width: min(220px, 46vw); text-align: left;
 }
+.world-scene.is-compact .world-hotspot { gap: 5px; padding: 4px 7px 4px 4px; border-radius: 10px; max-width: 148px; }
+.world-scene.is-compact .hotspot-pin { width: 24px; height: 24px; font-size: 0.72rem; }
+.world-scene.is-compact .hotspot-name { font-size: 0.7rem; }
+.world-scene.is-compact .hotspot-cost { font-size: 0.64rem; }
 .world-hotspot:hover { transform: scale(1.03); z-index: 2; }
 .world-hotspot.is-at { transform: translate(-25px, -50%); }
 .world-hotspot.is-at:hover { transform: translate(-25px, -50%) scale(1.03); }
