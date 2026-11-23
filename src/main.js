@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=17";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=18";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=17";
-import { GameEngine, SIZE } from "./engine.js?v=17";
+} from "./state.js?v=18";
+import { GameEngine, SIZE } from "./engine.js?v=18";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -14,6 +14,7 @@ let selected = null; // {r,c}
 let currentLevelId = null;
 let endModalShown = false;
 let activeBooster = null; // 'hammer' | 'bomb' | 'shuffle'
+let boosterTarget = null; // {kind,r,c}
 let boosters = { hammer: 1, bomb: 1, shuffle: 1 };
 let selectedGardenId = GARDENS[0].id;
 let hintMove = null;
@@ -698,12 +699,14 @@ function setActiveBooster(kind) {
   if (kind === "shuffle") {
     ensureAudio();
     activeBooster = null;
+    boosterTarget = null;
     boosters.shuffle -= 1;
     updateBoosterUI();
     engine.shuffleBoard().then(() => { renderBoard(engine.board, [], true); updateHUD(); });
     return;
   }
   activeBooster = activeBooster === kind ? null : kind;
+  boosterTarget = null;
   selected = null;
   clearHint();
   renderBoard(engine.board, []);
@@ -723,6 +726,7 @@ function startLevel(levelId) {
   endModalShown = false;
   autoPlaying = false;
   activeBooster = null;
+  boosterTarget = null;
   boosters = { hammer: 1, bomb: 1, shuffle: 1 };
   updateBoosterUI();
   const ov = $("#boardOverlay"); if (ov) { ov.textContent = ""; ov.classList.add("hidden"); }
@@ -887,6 +891,17 @@ function renderBoard(board, markedMatrix = [], spawn = false) {
       }
       if (selected && selected.r === r && selected.c === c) tile.classList.add("selected");
       if (markedMatrix[r] && markedMatrix[r][c]) tile.classList.add("matched");
+      if (boosterTarget) {
+        if (boosterTarget.kind === "hammer" && boosterTarget.r === r && boosterTarget.c === c) {
+          tile.classList.add("booster-target");
+        }
+        if (boosterTarget.kind === "bomb") {
+          if (Math.abs(boosterTarget.r - r) <= 1 && Math.abs(boosterTarget.c - c) <= 1 && t !== -2) {
+            tile.classList.add("booster-blast");
+            if (boosterTarget.r === r && boosterTarget.c === c) tile.classList.add("booster-target");
+          }
+        }
+      }
       tile.dataset.r = String(r);
       tile.dataset.c = String(c);
       if (t === -2) {
@@ -922,13 +937,19 @@ async function onTileClick(e) {
   if (activeBooster === "hammer" || activeBooster === "bomb") {
     if (engine.board[r][c] < 0) return;
     const kind = activeBooster;
-    activeBooster = null;
-    boosters[kind] -= 1;
-    updateBoosterUI();
-    if (kind === "hammer") await engine.activateHammer(r, c);
-    else await engine.activateBomb(r, c);
-    renderBoard(engine.board, []);
-    updateHUD();
+    if (boosterTarget && boosterTarget.kind === kind && boosterTarget.r === r && boosterTarget.c === c) {
+      activeBooster = null;
+      boosterTarget = null;
+      boosters[kind] -= 1;
+      updateBoosterUI();
+      if (kind === "hammer") await engine.activateHammer(r, c);
+      else await engine.activateBomb(r, c);
+      renderBoard(engine.board, []);
+      updateHUD();
+    } else {
+      boosterTarget = { kind, r, c };
+      renderBoard(engine.board, []);
+    }
     return;
   }
 
