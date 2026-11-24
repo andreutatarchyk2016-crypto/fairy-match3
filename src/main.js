@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=30";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=31";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=30";
-import { GameEngine, SIZE } from "./engine.js?v=30";
+} from "./state.js?v=31";
+import { GameEngine, SIZE } from "./engine.js?v=31";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -1193,7 +1193,7 @@ function showEndModal(snap) {
       const nextBtn = document.createElement("button");
       nextBtn.className = "btn btn-primary";
       nextBtn.textContent = "Следующий уровень";
-      nextBtn.addEventListener("click", () => { hideModal(); startLevel(next.id); });
+      nextBtn.addEventListener("click", () => { hideModal(); showLevelBrief(next.id); });
       actions.appendChild(nextBtn);
     } else {
       const doneBtn = document.createElement("button");
