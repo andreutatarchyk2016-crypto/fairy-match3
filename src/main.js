@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=25";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=29";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=25";
-import { GameEngine, SIZE } from "./engine.js?v=25";
+} from "./state.js?v=29";
+import { GameEngine, SIZE } from "./engine.js?v=29";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));

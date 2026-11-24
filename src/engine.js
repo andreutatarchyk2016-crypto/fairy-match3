@@ -1,4 +1,4 @@
-import { TILE_TYPES, BOARD_SHAPES } from "./data.js?v=25";
+import { TILE_TYPES, BOARD_SHAPES } from "./data.js?v=29";
 
 const SIZE = 8;
 const TYPES = TILE_TYPES.length;
@@ -213,7 +213,17 @@ export class GameEngine {
       let write = SIZE - 1;
       for (let r = SIZE - 1; r >= 0; r--) {
         const v = this.board[r][c];
-        if (v === -2) { write = r - 1; continue; }
+        if (v === -2) {
+          // fill the segment below this void
+          for (let rr = write; rr > r; rr--) {
+            if (this.board[rr][c] === -2) break;
+            const type = randType();
+            this.board[rr][c] = type;
+            movements.push({ fromR: -1 - (write - rr), fromC: c, toR: rr, toC: c, type, isNew: true });
+          }
+          write = r - 1;
+          continue;
+        }
         if (v >= 0) {
           if (write !== r) {
             this.board[write][c] = v;
@@ -223,12 +233,12 @@ export class GameEngine {
           write--;
         }
       }
-      // fill empties above write, but stop at voids
-      for (let r = write; r >= 0; r--) {
-        if (this.board[r][c] === -2) { write = r - 1; continue; }
+      // fill remaining top segment
+      for (let rr = write; rr >= 0; rr--) {
+        if (this.board[rr][c] === -2) break;
         const type = randType();
-        this.board[r][c] = type;
-        movements.push({ fromR: -1 - (write - r), fromC: c, toR: r, toC: c, type, isNew: true });
+        this.board[rr][c] = type;
+        movements.push({ fromR: -1 - (write - rr), fromC: c, toR: rr, toC: c, type, isNew: true });
       }
     }
     return movements;
