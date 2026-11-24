@@ -199,23 +199,28 @@ const STORY_BEATS = [
 
 function makeGoal(i) {
   // cycle through goal types for variety
-  const mod = i % 5;
+  const mod = i % 6;
   const tier = Math.floor(i / 14); // 0-3
-  const base = 14 + i * 2;
-  if (mod === 0 || mod === 3) {
-    return { type: "score", target: 900 + i * 120 + tier * 200 };
+  const base = 12 + Math.floor(i * 1.6);
+  if (mod === 0) {
+    return { type: "score", target: 800 + i * 95 + tier * 120 };
+  }
+  if (mod === 4 && i >= 8) {
+    const count = Math.min(18, 6 + Math.floor(i / 5));
+    return { type: "vines", target: count };
   }
   const tile = [3,1,5,4,2,0][i % 6];
-  return { type: "collect", tile, target: Math.min(40, base) };
+  return { type: "collect", tile, target: Math.min(32, base) };
 }
 
 function makeMoves(i) {
-  return Math.max(18, 20 + Math.floor(i / 2) - Math.floor(i / 10));
+  return Math.max(20, 24 + Math.floor(i / 2) - Math.floor(i / 14));
 }
 
 function makeStarThresholds(i, goal) {
-  const base = goal.type === "score" ? goal.target : 900 + i * 110;
-  return [base, Math.round(base * 1.45), Math.round(base * 1.9)];
+  const base = goal.type === "score" ? goal.target : 700 + i * 70;
+  const m3 = i < 20 ? 1.5 : i < 40 ? 1.4 : 1.3;
+  return [base, Math.round(base * 1.25), Math.round(base * m3)];
 }
 
 function pickShape(i) {
@@ -235,11 +240,25 @@ export const LEVELS = STORY_BEATS.map((beat, idx) => {
     { type: "collect", tile: 4, target: 26 },
     { type: "score", target: 3500 },
   ][i] : makeGoal(i);
-  const moves = i < 6 ? [20,22,24,24,26,28][i] : makeMoves(i);
+  const moves = i < 6 ? [20,22,24,24,26,32][i] : makeMoves(i);
   const starThresholds = i < 6 ? [
-    [800,1400,2000],[1000,1700,2400],[1200,2000,2800],[1400,2200,3200],[1600,2600,3600],[3500,5000,6500]
+    [800,1400,2000],[1000,1700,2400],[1200,2000,2800],[1400,2200,3200],[1600,2600,3600],[3500,4300,5000]
   ][i] : makeStarThresholds(i, goal);
   const gardenIndex = Math.floor(i / 14);
+  const shape = pickShape(i);
+  let vines = [];
+  if (goal.type === "vines") {
+    const mask = BOARD_SHAPES[shape] || BOARD_SHAPES.full;
+    const cells = [];
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (mask[r][c]) cells.push({ r, c });
+    // deterministic-ish shuffle based on level id
+    let seed = id * 2654435761;
+    const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    for (let k = cells.length - 1; k > 0; k--) { const j = Math.floor(rnd() * (k + 1)); [cells[k], cells[j]] = [cells[j], cells[k]]; }
+    const maxVines = Math.max(6, Math.min(goal.target, Math.floor(cells.length * 0.28), 14));
+    vines = cells.slice(0, maxVines);
+    goal.target = maxVines;
+  }
   return {
     id,
     title: beat[0],
@@ -247,7 +266,8 @@ export const LEVELS = STORY_BEATS.map((beat, idx) => {
     moves,
     goal,
     starThresholds,
-    shape: pickShape(i),
+    shape,
+    vines,
     gardenId: GARDENS[gardenIndex]?.id || GARDENS[GARDENS.length - 1].id,
   };
 });

@@ -1,9 +1,9 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=29";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=30";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=29";
-import { GameEngine, SIZE } from "./engine.js?v=29";
+} from "./state.js?v=30";
+import { GameEngine, SIZE } from "./engine.js?v=30";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -633,16 +633,17 @@ function hotspotPos(style = {}) {
 // ---------- Fairy hint ----------
 function findValidMove(board) {
   const size = board.length;
+  const vines = engine?.vines;
   function hasMatch(b) {
-    for (let r = 0; r < size; r++) for (let c = 0; c < size - 2; c++) { const v = b[r][c]; if (v >= 0 && v === b[r][c+1] && v === b[r][c+2]) return true; }
-    for (let c = 0; c < size; c++) for (let r = 0; r < size - 2; r++) { const v = b[r][c]; if (v >= 0 && v === b[r+1][c] && v === b[r+2][c]) return true; }
+    for (let r = 0; r < size; r++) for (let c = 0; c < size - 2; c++) { const v = b[r][c]; if (v >= 0 && !vines?.has(r+","+c) && v === b[r][c+1] && !vines?.has(r+","+(c+1)) && v === b[r][c+2] && !vines?.has(r+","+(c+2))) return true; }
+    for (let c = 0; c < size; c++) for (let r = 0; r < size - 2; r++) { const v = b[r][c]; if (v >= 0 && !vines?.has(r+","+c) && v === b[r+1][c] && !vines?.has((r+1)+","+c) && v === b[r+2][c] && !vines?.has((r+2)+","+c)) return true; }
     return false;
   }
   for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
-    if (board[r][c] < 0) continue;
+    if (board[r][c] < 0 || vines?.has(r+","+c)) continue;
     for (const [dr,dc] of [[1,0],[0,1]]) {
       const nr = r+dr, nc = c+dc; if (nr>=size||nc>=size) continue;
-      if (board[nr][nc] < 0) continue;
+      if (board[nr][nc] < 0 || vines?.has(nr+","+nc)) continue;
       const b = board.map(row => row.slice());
       [b[r][c], b[nr][nc]] = [b[nr][nc], b[r][c]];
       if (hasMatch(b)) return { a:{r,c}, b:{r:nr,c:nc} };
@@ -800,12 +801,13 @@ function startLevel(levelId) {
 function countMatchesOnBoard(board) {
   const size = board.length;
   const marked = Array.from({ length: size }, () => Array(size).fill(false));
+  const vines = engine?.vines;
   let any = false;
   for (let r = 0; r < size; r++) {
     let c = 0;
     while (c < size) {
-      const t = board[r][c]; if (t < 0) { c++; continue; }
-      let end = c + 1; while (end < size && board[r][end] === t) end++;
+      const t = board[r][c]; if (t < 0 || vines?.has(r+","+c)) { c++; continue; }
+      let end = c + 1; while (end < size && board[r][end] === t && !vines?.has(r+","+end)) end++;
       if (end - c >= 3) { for (let k = c; k < end; k++) marked[r][k] = true; any = true; }
       c = end;
     }
@@ -813,8 +815,8 @@ function countMatchesOnBoard(board) {
   for (let c = 0; c < size; c++) {
     let r = 0;
     while (r < size) {
-      const t = board[r][c]; if (t < 0) { r++; continue; }
-      let end = r + 1; while (end < size && board[end][c] === t) end++;
+      const t = board[r][c]; if (t < 0 || vines?.has(r+","+c)) { r++; continue; }
+      let end = r + 1; while (end < size && board[end][c] === t && !vines?.has(end+","+c)) end++;
       if (end - r >= 3) { for (let k = r; k < end; k++) marked[k][c] = true; any = true; }
       r = end;
     }
@@ -825,12 +827,13 @@ function countMatchesOnBoard(board) {
 
 function findBestMove(board) {
   const size = board.length;
+  const vines = engine?.vines;
   let best = null;
   for (let r = 0; r < size; r++) for (let c = 0; c < size; c++) {
-    if (board[r][c] < 0) continue;
+    if (board[r][c] < 0 || vines?.has(r+","+c)) continue;
     for (const [dr,dc] of [[1,0],[0,1]]) {
       const nr = r+dr, nc = c+dc; if (nr>=size||nc>=size) continue;
-      if (board[nr][nc] < 0) continue;
+      if (board[nr][nc] < 0 || vines?.has(nr+","+nc)) continue;
       const b = board.map(row => row.slice());
       [b[r][c], b[nr][nc]] = [b[nr][nc], b[r][c]];
       const res = countMatchesOnBoard(b);
@@ -977,7 +980,9 @@ function renderBoard(board, markedMatrix = [], spawn = false) {
       } else {
         tile.dataset.type = String(t);
         const gem = TILE_TYPES[t]?.gem || "";
-        tile.innerHTML = `<span class="gem">${gem}</span>`;
+        const vined = engine?.vines?.has(r + "," + c);
+        if (vined) tile.classList.add("vined");
+        tile.innerHTML = `<span class="gem">${gem}</span>${vined ? `<span class="vine-overlay" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path d="M12 52C18 42 20 34 28 28C36 22 44 20 52 12" stroke="#5fbe4a" stroke-width="5" stroke-linecap="round"/><path d="M20 52C24 44 30 38 36 34C42 30 48 24 52 20" stroke="#7ed957" stroke-width="4" stroke-linecap="round"/><path d="M16 44C22 44 24 40 28 36" stroke="#4ca83a" stroke-width="4" stroke-linecap="round"/><path d="M36 28C40 24 44 22 50 22" stroke="#4ca83a" stroke-width="4" stroke-linecap="round"/><ellipse cx="18" cy="46" rx="5" ry="3.2" fill="#7ed957" transform="rotate(-30 18 46)"/><ellipse cx="30" cy="34" rx="5" ry="3.2" fill="#8fe06a" transform="rotate(-35 30 34)"/><ellipse cx="42" cy="24" rx="5" ry="3.2" fill="#7ed957" transform="rotate(-35 42 24)"/></svg></span>` : ""}`;
       }
       tile.addEventListener("click", onTileClick);
       boardEl.appendChild(tile);
@@ -1023,6 +1028,8 @@ async function onTileClick(e) {
     return;
   }
 
+  if (engine.vines?.has(r + "," + c)) return;
+
   if (!selected) {
     selected = { r, c };
     renderBoard(engine.board, []);
@@ -1057,7 +1064,7 @@ function setupSwipe() {
   boardEl.addEventListener("pointerdown", (e) => {
     if (!engine || engine.busy || engine.over || autoPlaying) return;
     const tile = e.target.closest(".tile");
-    if (!tile || tile.classList.contains("empty")) return;
+    if (!tile || tile.classList.contains("empty") || tile.classList.contains("vined")) return;
     drag = {
       startX: e.clientX, startY: e.clientY,
       r: Number(tile.dataset.r), c: Number(tile.dataset.c),
@@ -1079,6 +1086,7 @@ function setupSwipe() {
     drag.handled = true;
     suppressClick = true;
     if (nr < 0 || nr >= SIZE || nc < 0 || nc >= SIZE) return;
+    if (engine.vines?.has(nr + "," + nc)) return;
     ensureAudio();
     clearHint();
     clearTimeout(hintIdleTimer);
@@ -1105,13 +1113,16 @@ function showLevelBrief(levelId) {
   const stars = state.starsEarned[levelId] || 0;
   const goal = level.goal.type === "score"
     ? `Набрать ${level.goal.target} очков`
+    : level.goal.type === "vines"
+    ? `Освободить фишки от лозы: ${level.goal.target}`
     : `Собрать ${TILE_TYPES[level.goal.tile].gem} ${TILE_TYPES[level.goal.tile].name}: ${level.goal.target}`;
   const [s1, s2, s3] = level.starThresholds;
   $("#confetti").innerHTML = "";
   $("#modalStars").innerHTML = [1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("");
   $("#modalTitle").textContent = `Уровень ${level.id}: ${level.title}`;
   $("#modalText").textContent = level.story;
-  $("#modalReward").innerHTML = `<div style="color:var(--text);font-size:0.98rem;line-height:1.6"><strong style="color:var(--gold)">Цель:</strong> ${goal}<br><span style="color:var(--muted)">Ходов: ${level.moves} · Выполните цель и набирайте очки для звёзд</span><div style="margin-top:8px;color:var(--muted)"><strong style="color:var(--gold)">Звёзды за очки:</strong> ★ ${s1} · ★★ ${s2} · ★★★ ${s3}</div></div>`;
+  const vineNote = level.goal.type === "vines" ? `<div style="margin-top:8px;color:#b8f0a2">🌿 Составляй комбинации рядом с лозой, чтобы освободить фишки.</div>` : "";
+  $("#modalReward").innerHTML = `<div style="color:var(--text);font-size:0.98rem;line-height:1.6"><strong style="color:var(--gold)">Цель:</strong> ${goal}<br><span style="color:var(--muted)">Ходов: ${level.moves} · Выполните цель и набирайте очки для звёзд</span><div style="margin-top:8px;color:var(--muted)"><strong style="color:var(--gold)">Звёзды за очки:</strong> ★ ${s1} · ★★ ${s2} · ★★★ ${s3}</div>${vineNote}</div>`;
   const actions = $("#modalActions");
   actions.innerHTML = "";
   const backBtn = document.createElement("button");

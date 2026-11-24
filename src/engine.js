@@ -1,4 +1,4 @@
-import { TILE_TYPES, BOARD_SHAPES } from "./data.js?v=29";
+import { TILE_TYPES, BOARD_SHAPES } from "./data.js?v=30";
 
 const SIZE = 8;
 const TYPES = TILE_TYPES.length;
@@ -37,7 +37,11 @@ function createsInitialMatch(board, r, c, type, mask) {
   return false;
 }
 
-function findMatches(board) {
+function isVined(vines, r, c) {
+  return vines && vines.has(r + "," + c);
+}
+
+function findMatches(board, vines) {
   const marked = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
   let any = false;
 
@@ -46,9 +50,9 @@ function findMatches(board) {
     let c = 0;
     while (c < SIZE) {
       const t = board[r][c];
-      if (t < 0) { c++; continue; }
+      if (t < 0 || isVined(vines, r, c)) { c++; continue; }
       let end = c + 1;
-      while (end < SIZE && board[r][end] === t) end++;
+      while (end < SIZE && board[r][end] === t && !isVined(vines, r, end)) end++;
       if (end - c >= 3) {
         for (let k = c; k < end; k++) marked[r][k] = true;
         any = true;
@@ -61,9 +65,9 @@ function findMatches(board) {
     let r = 0;
     while (r < SIZE) {
       const t = board[r][c];
-      if (t < 0) { r++; continue; }
+      if (t < 0 || isVined(vines, r, c)) { r++; continue; }
       let end = r + 1;
-      while (end < SIZE && board[end][c] === t) end++;
+      while (end < SIZE && board[end][c] === t && !isVined(vines, end, c)) end++;
       if (end - r >= 3) {
         for (let k = r; k < end; k++) marked[k][c] = true;
         any = true;
@@ -103,6 +107,8 @@ export class GameEngine {
 
   reset() {
     this.mask = BOARD_SHAPES[this.level.shape] || BOARD_SHAPES.full;
+    this.vines = new Set((this.level.vines || []).map(p => p.r + "," + p.c));
+    this.vinesCleared = 0;
     this.board = createBoard(this.mask);
     // Ensure no immediate matches (our generator tries, but be safe)
     this.resolveInitial();
@@ -118,14 +124,14 @@ export class GameEngine {
   resolveInitial() {
     // silently clear any initial matches without scoring
     for (let i = 0; i < 20; i++) {
-      const { marked, any } = findMatches(this.board);
+      const { marked, any } = findMatches(this.board, this.vines);
       if (!any) break;
       for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) if (marked[r][c]) this.board[r][c] = randType();
       // recheck - easier to just regenerate colliding cells; but may loop. fallback: regenerate board
     }
     // hard guarantee
     let guard = 0;
-    while (findMatches(this.board).any && guard++ < 50) {
+    while (findMatches(this.board, this.vines).any && guard++ < 50) {
       this.board = createBoard(this.mask);
     }
   }
@@ -141,6 +147,7 @@ export class GameEngine {
     if (!this.inBounds(a.r, a.c) || !this.inBounds(b.r, b.c)) return false;
     if (!this.isAdjacent(a, b)) return false;
     if (this.board[a.r][a.c] < 0 || this.board[b.r][b.c] < 0) return false;
+    if (this.vines?.has(a.r + "," + a.c) || this.vines?.has(b.r + "," + b.c)) return false;
     return true;
   }
 
@@ -150,7 +157,7 @@ export class GameEngine {
     this.swapCells(a, b);
     await this.cb.onSwap?.(a, b, cloneBoard(this.board));
 
-    const { any } = findMatches(this.board);
+    const { any } = findMatches(this.board, this.vines);
     if (!any) {
       await delay(120);
       this.swapCells(a, b);
@@ -177,9 +184,27 @@ export class GameEngine {
     this.board[b.r][b.c] = t;
   }
 
+  clearVinesByMarked(marked) {
+    if (!this.vines || this.vines.size === 0) return 0;
+    const toClear = [];
+    for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
+      if (!marked[r][c]) continue;
+      for (const [dr, dc] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+        const nr = r + dr, nc = c + dc;
+        const k = nr + "," + nc;
+        if (this.vines.has(k)) toClear.push(k);
+      }
+    }
+    let cleared = 0;
+    for (const k of toClear) {
+      if (this.vines.delete(k)) { this.vinesCleared++; cleared++; }
+    }
+    return cleared;
+  }
+
   async resolveCascades() {
     while (true) {
-      const { marked, any } = findMatches(this.board);
+      const { marked, any } = findMatches(this.board, this.vines);
       if (!any) break;
       this.combo += 1;
       const cleared = countMarked(marked);
@@ -188,9 +213,11 @@ export class GameEngine {
         const k = Number(t);
         this.collected[k] = (this.collected[k] || 0) + n;
       }
-      const gain = cleared * 10 * this.combo + Math.max(0, cleared - 3) * 15;
+      let gain = cleared * 10 * this.combo + Math.max(0, cleared - 3) * 15;
+      const vinesCleared = this.clearVinesByMarked(marked);
+      if (vinesCleared > 0) gain += vinesCleared * 30;
       this.score += gain;
-      this.cb.onMatch?.({ marked: marked.map(r => r.slice()), cleared, combo: this.combo, gain, collected: { ...this.collected }, score: this.score });
+      this.cb.onMatch?.({ marked: marked.map(r => r.slice()), cleared, combo: this.combo, gain, collected: { ...this.collected }, score: this.score, vinesCleared });
 
       await delay(260);
 
@@ -254,6 +281,10 @@ export class GameEngine {
       const tile = TILE_TYPES[g.tile];
       return { current, target: g.target, done: current >= g.target, text: `Собрать ${tile.gem} ${tile.name}: ${g.target}` };
     }
+    if (g.type === "vines") {
+      const current = this.vinesCleared || 0;
+      return { current, target: g.target, done: current >= g.target, text: `Освободить фишки от лозы: ${g.target}` };
+    }
     return { current: 0, target: 1, done: false, text: "Цель" };
   }
 
@@ -277,13 +308,21 @@ export class GameEngine {
     if (this.busy || this.over) return false;
     if (!this.inBounds(r, c) || this.board[r][c] < 0) return false;
     this.busy = true;
+    const key = r + "," + c;
+    let gain = 0;
+    if (this.vines?.has(key)) {
+      this.vines.delete(key);
+      this.vinesCleared++;
+      gain += 30;
+    }
     const t = this.board[r][c];
     if (t >= 0) {
       this.collected[t] = (this.collected[t] || 0) + 1;
-      this.score += 20;
+      gain += 20;
     }
+    this.score += gain;
     this.board[r][c] = -1;
-    this.cb.onMatch?.({ marked: Array.from({ length: SIZE }, (_, rr) => Array.from({ length: SIZE }, (_, cc) => rr === r && cc === c)), cleared: 1, combo: 0, gain: 20, collected: { ...this.collected }, score: this.score });
+    this.cb.onMatch?.({ marked: Array.from({ length: SIZE }, (_, rr) => Array.from({ length: SIZE }, (_, cc) => rr === r && cc === c)), cleared: t >= 0 ? 1 : 0, combo: 0, gain, collected: { ...this.collected }, score: this.score });
     await delay(200);
     this.cb.onClear?.(cloneBoard(this.board));
     await delay(120);
@@ -303,10 +342,13 @@ export class GameEngine {
     this.busy = true;
     let clearedAny = false;
     let cleared = 0;
+    let vinesCleared = 0;
     const marked = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
     for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
       const nr = r + dr, nc = c + dc;
       if (!this.inBounds(nr, nc)) continue;
+      const vk = nr + "," + nc;
+      if (this.vines?.has(vk)) { this.vines.delete(vk); this.vinesCleared++; vinesCleared++; clearedAny = true; }
       const t = this.board[nr][nc];
       if (t >= 0) {
         this.collected[t] = (this.collected[t] || 0) + 1;
@@ -317,9 +359,9 @@ export class GameEngine {
       }
     }
     if (!clearedAny) { this.busy = false; return false; }
-    const gain = cleared * 20;
+    const gain = cleared * 20 + vinesCleared * 30;
     this.score += gain;
-    this.cb.onMatch?.({ marked, cleared, combo: 0, gain, collected: { ...this.collected }, score: this.score });
+    this.cb.onMatch?.({ marked, cleared, combo: 0, gain, collected: { ...this.collected }, score: this.score, vinesCleared });
     await delay(220);
     this.cb.onClear?.(cloneBoard(this.board));
     await delay(120);
@@ -337,7 +379,9 @@ export class GameEngine {
     if (this.busy || this.over) return false;
     this.busy = true;
     const cells = [];
-    for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) if (this.board[r][c] >= 0) cells.push({r,c});
+    for (let r = 0; r < SIZE; r++) for (let c = 0; c < SIZE; c++) {
+      if (this.board[r][c] >= 0 && !this.vines?.has(r + "," + c)) cells.push({r,c});
+    }
     const types = cells.map(p => this.board[p.r][p.c]);
     for (let i = types.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [types[i],types[j]]=[types[j],types[i]]; }
     cells.forEach((p, i) => { this.board[p.r][p.c] = types[i]; });
