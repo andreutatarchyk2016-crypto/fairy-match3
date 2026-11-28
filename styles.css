@@ -237,8 +237,8 @@ body[data-theme="winter"] .forest-mist-a, body[data-theme="winter"] .forest-mist
 .garden-path {
   position: relative;
   width: 100%;
-  aspect-ratio: 9 / 32;
-  min-height: 1100px;
+  aspect-ratio: 9 / 16;
+  min-height: 680px;
   border-radius: 20px;
   overflow: hidden;
   border: 1px solid rgba(255,255,255,0.14);
@@ -248,8 +248,8 @@ body[data-theme="winter"] .forest-mist-a, body[data-theme="winter"] .forest-mist
 .garden-path-bg {
   position: absolute; inset: 0;
   background-position: top center;
-  background-size: 100% auto;
-  background-repeat: repeat-y;
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
   filter: saturate(1.02);
 }
 .garden-path-bg::after {
@@ -320,10 +320,10 @@ body[data-theme="winter"] .forest-mist-a, body[data-theme="winter"] .forest-mist
 .path-castle.is-open .path-castle-label { color: var(--gold); border-color: rgba(255,216,74,0.35); }
 
 @media (max-width: 720px) {
-  .garden-path { min-height: 860px; border-radius: 16px; }
-  .path-node-circle { width: 54px; height: 54px; }
-  .path-node-num { font-size: 1.25rem; }
-  .path-node-stars { font-size: 0.82rem; }
+  .garden-path { min-height: 0; border-radius: 16px; }
+  .path-node-circle { width: 52px; height: 52px; border-width: 2px; }
+  .path-node-num { font-size: 1.2rem; }
+  .path-node-stars { font-size: 0.78rem; }
   .path-castle-label { font-size: 0.7rem; padding: 5px 10px; white-space: normal; max-width: 180px; }
 }
 

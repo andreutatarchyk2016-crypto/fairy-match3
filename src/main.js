@@ -1,11 +1,11 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=35";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=36";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade,
   getBoosterCount, spendBooster, addBoosters,
   canClaimDailyReward, claimDailyReward, isLocationRewardClaimed, claimLocationReward
-} from "./state.js?v=35";
-import { GameEngine, SIZE } from "./engine.js?v=35";
+} from "./state.js?v=36";
+import { GameEngine, SIZE } from "./engine.js?v=36";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -380,12 +380,12 @@ function renderGardenPath(levels) {
   const path = document.createElement("div");
   path.className = "garden-path-nodes";
 
-  // Positions for 14 levels (bottom -> top) as [left%, top%], sampled from path
+  // Positions for 14 levels (bottom -> top) as [left%, top%], sampled from the map path
   const pos = [
-    [43, 94], [44, 88], [58, 81], [65, 75],
-    [61, 68], [49, 62], [41, 55], [41, 49],
-    [54, 42], [64, 36], [62, 29], [49, 23],
-    [38, 16], [46, 10]
+    [43, 93], [44, 86], [58, 78], [65, 72],
+    [61, 66], [49, 59], [41, 53], [41, 47],
+    [54, 41], [64, 34], [62, 28], [49, 22],
+    [38, 14], [46, 7]
   ];
 
   levels.forEach((level, idx) => {
