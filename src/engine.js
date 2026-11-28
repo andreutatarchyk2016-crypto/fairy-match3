@@ -1,4 +1,4 @@
-import { TILE_TYPES, BOARD_SHAPES } from "./data.js?v=33";
+import { TILE_TYPES, BOARD_SHAPES } from "./data.js?v=34";
 
 const SIZE = 8;
 const TYPES = TILE_TYPES.length;

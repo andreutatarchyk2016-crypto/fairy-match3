@@ -233,6 +233,100 @@ body[data-theme="winter"] .forest-mist-a, body[data-theme="winter"] .forest-mist
 .level-stars .earned { color: var(--gold); text-shadow: 0 0 10px rgba(255,212,92,0.4); }
 .level-lock { position: absolute; top: 12px; right: 12px; font-size: 0.9rem; }
 
+/* Garden path map (Сад Чудес only) */
+.garden-path {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 32;
+  min-height: 1100px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 10px 30px rgba(20,8,45,0.25);
+  background: #2a5a2a;
+}
+.garden-path-bg {
+  position: absolute; inset: 0;
+  background-position: top center;
+  background-size: 100% auto;
+  background-repeat: repeat-y;
+  filter: saturate(1.02);
+}
+.garden-path-bg::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.03) 40%, rgba(0,0,0,0.08));
+  pointer-events: none;
+}
+.garden-path-nodes { position: absolute; inset: 0; }
+.path-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: transparent; border: 0; padding: 0; cursor: pointer;
+  color: var(--text);
+}
+.path-node:disabled { cursor: default; }
+.path-node-circle {
+  width: 62px; height: 62px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: radial-gradient(circle at 35% 30%, #fff3bf, #ffd84a 55%, #e8a800 100%);
+  border: 3px solid rgba(255,255,255,0.9);
+  box-shadow: 0 6px 16px rgba(40,20,0,0.35), 0 0 0 4px rgba(255,216,74,0.25), inset 0 2px 4px rgba(255,255,255,0.8);
+  transition: transform .18s, filter .18s;
+}
+.path-node:hover:not(:disabled) .path-node-circle { transform: scale(1.08); filter: brightness(1.05); }
+.path-node.is-locked .path-node-circle {
+  background: radial-gradient(circle at 35% 30%, #cfcfcf, #9aa0a6 60%, #70757a 100%);
+  box-shadow: 0 6px 16px rgba(20,20,30,0.3), 0 0 0 4px rgba(255,255,255,0.12);
+  filter: grayscale(0.2);
+}
+.path-node.is-done .path-node-circle {
+  background: radial-gradient(circle at 35% 30%, #dfffb0, #8be04a 55%, #4ba82a 100%);
+  box-shadow: 0 6px 16px rgba(20,60,10,0.35), 0 0 0 4px rgba(140,230,80,0.25), inset 0 2px 4px rgba(255,255,255,0.7);
+}
+.path-node.is-current .path-node-circle {
+  animation: pulseNode 2.2s ease-in-out infinite;
+  box-shadow: 0 0 0 4px rgba(255,216,74,0.45), 0 0 24px rgba(255,216,74,0.45), 0 8px 20px rgba(40,20,0,0.35);
+}
+.path-node-num {
+  font-size: 1.45rem; font-weight: 900; color: #5a3200;
+  text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+  line-height: 1;
+}
+.path-node.is-locked .path-node-num { color: #3b3f45; }
+.path-node.is-done .path-node-num { color: #1f5a10; }
+.path-node-stars {
+  display: flex; gap: 2px; font-size: 0.95rem; line-height: 1;
+  color: rgba(255,255,255,0.35); text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+}
+.path-node-stars .earned { color: #ffd84a; text-shadow: 0 0 8px rgba(255,216,74,0.6), 0 1px 3px rgba(0,0,0,0.5); }
+.path-node-lock { position: absolute; top: -2px; right: -2px; font-size: 1rem; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.5)); }
+
+.path-castle {
+  position: absolute; transform: translate(-50%, -50%);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  text-align: center; pointer-events: none;
+}
+.path-castle-icon { font-size: clamp(3.4rem, 8vw, 5.4rem); filter: drop-shadow(0 8px 18px rgba(0,0,0,0.35)); transition: filter .4s, transform .4s; }
+.path-castle.is-closed .path-castle-icon { filter: grayscale(0.85) brightness(0.75) drop-shadow(0 8px 18px rgba(0,0,0,0.35)); }
+.path-castle.is-open .path-castle-icon { filter: drop-shadow(0 0 18px rgba(255,216,74,0.55)) drop-shadow(0 8px 18px rgba(0,0,0,0.3)); animation: castleGlow 2.6s ease-in-out infinite; }
+@keyframes castleGlow { 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.04); } }
+.path-castle-label {
+  padding: 6px 12px; border-radius: 999px;
+  background: rgba(40, 22, 70, 0.72); border: 1px solid rgba(255,255,255,0.18);
+  color: #fff; font-size: 0.78rem; font-weight: 800; white-space: nowrap;
+  backdrop-filter: blur(4px);
+}
+.path-castle.is-open .path-castle-label { color: var(--gold); border-color: rgba(255,216,74,0.35); }
+
+@media (max-width: 720px) {
+  .garden-path { min-height: 860px; border-radius: 16px; }
+  .path-node-circle { width: 54px; height: 54px; }
+  .path-node-num { font-size: 1.25rem; }
+  .path-node-stars { font-size: 0.82rem; }
+  .path-castle-label { font-size: 0.7rem; padding: 5px 10px; white-space: normal; max-width: 180px; }
+}
+
 .garden-tabs { display: flex; gap: 8px; padding: 16px 22px 0; flex-wrap: wrap; }
 .garden-tab { padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: var(--muted); font-weight: 800; font-size: 0.82rem; display: inline-flex; gap: 6px; align-items: center; }
 .garden-tab small { font-size: 0.72rem; opacity: 0.8; }

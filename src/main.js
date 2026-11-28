@@ -1,11 +1,11 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=33";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=34";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade,
   getBoosterCount, spendBooster, addBoosters,
   canClaimDailyReward, claimDailyReward, isLocationRewardClaimed, claimLocationReward
-} from "./state.js?v=33";
-import { GameEngine, SIZE } from "./engine.js?v=33";
+} from "./state.js?v=34";
+import { GameEngine, SIZE } from "./engine.js?v=34";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -368,6 +368,61 @@ function renderTopbar() {
   $("#starBank").textContent = String(starBank(state, UPGRADES));
 }
 
+function renderGardenPath(levels) {
+  const wrap = document.createElement("div");
+  wrap.className = "garden-path";
+
+  const bg = document.createElement("div");
+  bg.className = "garden-path-bg";
+  bg.style.backgroundImage = "url('./img/garden-map-bg.png')";
+  wrap.appendChild(bg);
+
+  const path = document.createElement("div");
+  path.className = "garden-path-nodes";
+
+  // Positions for 14 levels (bottom -> top) as [left%, top%]
+  const pos = [
+    [50, 93], [28, 87], [50, 81], [72, 75],
+    [52, 69], [30, 63], [52, 57], [72, 51],
+    [52, 45], [30, 39], [52, 33], [72, 27],
+    [52, 20], [32, 13]
+  ];
+
+  levels.forEach((level, idx) => {
+    const p = pos[idx] || [50, 95 - idx * 6];
+    const unlocked = isLevelUnlocked(level.id, state);
+    const stars = state.starsEarned[level.id] || 0;
+    const isCurrent = unlocked && stars === 0 && (level.id === 1 || (state.starsEarned[level.id - 1] || 0) > 0);
+    const node = document.createElement("button");
+    node.className = "path-node" + (unlocked ? "" : " is-locked") + (isCurrent ? " is-current" : "") + (stars > 0 ? " is-done" : "");
+    node.style.left = p[0] + "%";
+    node.style.top = p[1] + "%";
+    node.disabled = !unlocked;
+    node.innerHTML = `
+      <span class="path-node-circle"><span class="path-node-num">${level.id}</span></span>
+      <span class="path-node-stars">${[1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("")}</span>
+      ${unlocked ? "" : '<span class="path-node-lock">🔒</span>'}
+    `;
+    node.addEventListener("click", () => { ensureAudio(); showLevelBrief(level.id); });
+    path.appendChild(node);
+  });
+
+  // Castle after level 14
+  const lastDone = (state.starsEarned[14] || 0) > 0;
+  const castle = document.createElement("div");
+  castle.className = "path-castle" + (lastDone ? " is-open" : " is-closed");
+  castle.style.left = "52%";
+  castle.style.top = "4%";
+  castle.innerHTML = `
+    <div class="path-castle-icon">${lastDone ? "🏰" : "🏰"}</div>
+    <div class="path-castle-label">${lastDone ? "Замок открыт!" : "Замок откроется после 14 уровня"}</div>
+  `;
+  path.appendChild(castle);
+
+  wrap.appendChild(path);
+  return wrap;
+}
+
 function renderMap() {
   renderTopbar();
   $("#storyIntro").textContent = STORY_INTRO;
@@ -390,25 +445,30 @@ function renderMap() {
     const levels = LEVELS.filter((l) => l.gardenId === garden.id);
     const done = levels.filter((l) => (state.starsEarned[l.id] || 0) > 0).length;
     section.innerHTML = `<div class="map-garden-head"><div><div class="map-garden-name">${garden.name}</div><div class="map-garden-meta">${done}/${levels.length} уровней</div></div></div>`;
-    const grid = document.createElement("div");
-    grid.className = "level-grid";
-    for (const level of levels) {
-      const unlocked = isLevelUnlocked(level.id, state);
-      const stars = state.starsEarned[level.id] || 0;
-      const isCurrent = unlocked && stars === 0 && (level.id === 1 || (state.starsEarned[level.id - 1] || 0) > 0);
-      const btn = document.createElement("button");
-      btn.className = "level-node" + (unlocked ? "" : " is-locked") + (isCurrent ? " is-current" : "");
-      btn.disabled = !unlocked;
-      btn.innerHTML = `
-        <div class="level-num">Уровень ${level.id}</div>
-        <div class="level-name">${level.title}</div>
-        <div class="level-stars">${[1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("")}</div>
-        ${unlocked ? "" : '<div class="level-lock">🔒</div>'}
-      `;
-      btn.addEventListener("click", () => { ensureAudio(); showLevelBrief(level.id); });
-      grid.appendChild(btn);
+
+    if (garden.id === "garden") {
+      section.appendChild(renderGardenPath(levels));
+    } else {
+      const grid = document.createElement("div");
+      grid.className = "level-grid";
+      for (const level of levels) {
+        const unlocked = isLevelUnlocked(level.id, state);
+        const stars = state.starsEarned[level.id] || 0;
+        const isCurrent = unlocked && stars === 0 && (level.id === 1 || (state.starsEarned[level.id - 1] || 0) > 0);
+        const btn = document.createElement("button");
+        btn.className = "level-node" + (unlocked ? "" : " is-locked") + (isCurrent ? " is-current" : "");
+        btn.disabled = !unlocked;
+        btn.innerHTML = `
+          <div class="level-num">Уровень ${level.id}</div>
+          <div class="level-name">${level.title}</div>
+          <div class="level-stars">${[1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("")}</div>
+          ${unlocked ? "" : '<div class="level-lock">🔒</div>'}
+        `;
+        btn.addEventListener("click", () => { ensureAudio(); showLevelBrief(level.id); });
+        grid.appendChild(btn);
+      }
+      section.appendChild(grid);
     }
-    section.appendChild(grid);
     map.appendChild(section);
   }
 
