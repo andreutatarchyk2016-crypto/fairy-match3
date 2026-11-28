@@ -1,11 +1,11 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=38";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=39";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade,
   getBoosterCount, spendBooster, addBoosters,
   canClaimDailyReward, claimDailyReward, isLocationRewardClaimed, claimLocationReward
-} from "./state.js?v=38";
-import { GameEngine, SIZE } from "./engine.js?v=38";
+} from "./state.js?v=39";
+import { GameEngine, SIZE } from "./engine.js?v=39";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -1034,6 +1034,10 @@ function renderBoard(board, markedMatrix = [], spawn = false) {
       }
       tile.dataset.r = String(r);
       tile.dataset.c = String(c);
+      // Explicit grid placement: prevents auto-placement from skipping
+      // cells occupied by the bomb outline overlay (which has definite position).
+      tile.style.gridRow = String(r + 1);
+      tile.style.gridColumn = String(c + 1);
       if (t === -2) {
         tile.classList.add("void");
         tile.dataset.type = "";
