@@ -1,9 +1,11 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=31";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=32";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
-  isLevelUnlocked, recordLevelResult, buildUpgrade
-} from "./state.js?v=31";
-import { GameEngine, SIZE } from "./engine.js?v=31";
+  isLevelUnlocked, recordLevelResult, buildUpgrade,
+  getBoosterCount, spendBooster, addBoosters,
+  canClaimDailyReward, claimDailyReward, isLocationRewardClaimed, claimLocationReward
+} from "./state.js?v=32";
+import { GameEngine, SIZE } from "./engine.js?v=32";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -15,7 +17,8 @@ let currentLevelId = null;
 let endModalShown = false;
 let activeBooster = null; // 'hammer' | 'bomb' | 'shuffle'
 let boosterTarget = null; // {kind,r,c}
-let boosters = { hammer: 1, bomb: 1, shuffle: 1 };
+// boosters are persisted in state.boosters
+let dailyRewardDismissedThisSession = false;
 let shuffling = false;
 let selectedGardenId = GARDENS[0].id;
 let hintMove = null;
@@ -153,6 +156,9 @@ function showScreen(name) {
   $$(".screen").forEach((s) => s.classList.remove("active"));
   $(`#screen-${name}`).classList.add("active");
   if (name === "world") requestAnimationFrame(() => renderWorld());
+  if (name === "home" && !dailyRewardDismissedThisSession) {
+    setTimeout(() => { if ($("#modal")?.classList.contains("hidden")) showDailyRewardModal(); }, 600);
+  }
 }
 
 let worldResizeTimer = 0;
@@ -688,7 +694,7 @@ function updateBoosterUI() {
     const btn = document.getElementById(id);
     const count = document.getElementById(id + "Count");
     if (!btn) continue;
-    const n = boosters[k] || 0;
+    const n = getBoosterCount(state, k);
     btn.classList.toggle("is-active", activeBooster === k);
     btn.classList.toggle("is-empty", n <= 0);
     if (count) count.textContent = String(n);
@@ -697,12 +703,13 @@ function updateBoosterUI() {
 
 function setActiveBooster(kind) {
   if (!engine || engine.busy || engine.over) return;
-  if (!boosters[kind] || boosters[kind] <= 0) return;
+  if (getBoosterCount(state, kind) <= 0) return;
   if (kind === "shuffle") {
     ensureAudio();
     activeBooster = null;
     boosterTarget = null;
-    boosters.shuffle -= 1;
+    if (!spendBooster(state, "shuffle")) return;
+    saveState(state);
     updateBoosterUI();
     shuffling = true;
     const tiles = $$("#board .tile:not(.void)");
@@ -751,7 +758,6 @@ function startLevel(levelId) {
   autoPlaying = false;
   activeBooster = null;
   boosterTarget = null;
-  boosters = { hammer: 1, bomb: 1, shuffle: 1 };
   updateBoosterUI();
   const ov = $("#boardOverlay"); if (ov) { ov.textContent = ""; ov.classList.add("hidden"); }
   clearHint();
@@ -1015,7 +1021,8 @@ async function onTileClick(e) {
     if (boosterTarget && boosterTarget.kind === kind && boosterTarget.r === r && boosterTarget.c === c) {
       activeBooster = null;
       boosterTarget = null;
-      boosters[kind] -= 1;
+      if (!spendBooster(state, kind)) { updateBoosterUI(); return; }
+      saveState(state);
       updateBoosterUI();
       if (kind === "hammer") await engine.activateHammer(r, c);
       else await engine.activateBomb(r, c);
@@ -1147,8 +1154,17 @@ function showEndModal(snap) {
   const stars = won ? engine.starsForScore(snap.score) : 0;
   const prevStars = state.starsEarned[level.id] || 0;
 
+  let locationRewards = [];
   if (won) {
     recordLevelResult(state, level.id, stars);
+    for (const g of GARDENS) {
+      const gardenLevels = LEVELS.filter(l => l.gardenId === g.id);
+      const complete = gardenLevels.length > 0 && gardenLevels.every(l => (state.starsEarned[l.id] || 0) > 0);
+      if (complete && !isLocationRewardClaimed(state, g.id)) {
+        const reward = claimLocationReward(state, g.id);
+        if (reward) locationRewards.push({ garden: g, reward });
+      }
+    }
     saveState(state);
     renderTopbar();
     sfxWin();
@@ -1169,8 +1185,15 @@ function showEndModal(snap) {
     : `Не хватило немного магии. Попробуй ещё раз — цель: ${engine.goalProgress().text.toLowerCase()}.`;
 
   const [s1,s2,s3] = level.starThresholds;
+  const rewardHtml = locationRewards.map(({ garden, reward }) => {
+    const parts = [];
+    if (reward.hammer) parts.push(`🔨×${reward.hammer}`);
+    if (reward.bomb) parts.push(`💣×${reward.bomb}`);
+    if (reward.shuffle) parts.push(`🔀×${reward.shuffle}`);
+    return `<div style="margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(255,216,74,0.12);border:1px solid rgba(255,216,74,0.28);color:var(--gold)"><strong>Награда за локацию «${garden.name}»:</strong><div style="margin-top:4px;color:var(--text)">${parts.join(" · ")}</div></div>`;
+  }).join("");
   $("#modalReward").innerHTML = won
-    ? `<div>Счёт: ${snap.score}</div><div style="margin-top:4px;color:var(--muted);font-size:0.9rem">Звёзды: ★ ${s1} · ★★ ${s2} · ★★★ ${s3}</div>`
+    ? `<div>Счёт: ${snap.score}</div><div style="margin-top:4px;color:var(--muted);font-size:0.9rem">Звёзды: ★ ${s1} · ★★ ${s2} · ★★★ ${s3}</div>${rewardHtml}`
     : `Счёт: ${snap.score}`;
 
   const actions = $("#modalActions");
@@ -1212,6 +1235,46 @@ function showEndModal(snap) {
 function hideModal() { $("#modal").classList.add("hidden"); $("#confetti").innerHTML = ""; }
 $("#modal").addEventListener("click", (e) => { if (e.target.id === "modal") { /* don't close on backdrop during end */ } });
 
+function showDailyRewardModal() {
+  if (!canClaimDailyReward(state)) return;
+  const modal = $("#modal");
+  $("#confetti").innerHTML = "";
+  $("#modalStars").innerHTML = `<span class="earned">🎁</span>`;
+  $("#modalTitle").textContent = "Ежедневный бонус";
+  $("#modalText").textContent = "Заходи каждый день и получай волшебные бонусы для прохождения уровней!";
+  $("#modalReward").innerHTML = `<div style="color:var(--muted);font-size:0.95rem">Нажми «Забрать», чтобы получить случайный бонус.</div>`;
+  const actions = $("#modalActions");
+  actions.innerHTML = "";
+  const laterBtn = document.createElement("button");
+  laterBtn.className = "btn btn-secondary";
+  laterBtn.textContent = "Позже";
+  laterBtn.addEventListener("click", () => { dailyRewardDismissedThisSession = true; hideModal(); });
+  const claimBtn = document.createElement("button");
+  claimBtn.className = "btn btn-primary";
+  claimBtn.textContent = "Забрать";
+  claimBtn.addEventListener("click", () => {
+    const reward = claimDailyReward(state);
+    if (!reward) { hideModal(); return; }
+    saveState(state);
+    updateBoosterUI();
+    sfxBuy();
+    burstConfetti();
+    const names = { hammer: "Молоток 🔨", bomb: "Бомба 💣", shuffle: "Перемешивание 🔀" };
+    $("#modalStars").innerHTML = `<span class="earned">✨</span>`;
+    $("#modalTitle").textContent = "Бонус получен!";
+    $("#modalText").textContent = `Ты получил: ${names[reward.kind] || reward.kind} ×${reward.amount}`;
+    $("#modalReward").innerHTML = `<div style="color:var(--muted);font-size:0.95rem">Бонус добавлен в инвентарь и не исчезнет после перезапуска уровня.</div>`;
+    actions.innerHTML = "";
+    const okBtn = document.createElement("button");
+    okBtn.className = "btn btn-primary";
+    okBtn.textContent = "Отлично";
+    okBtn.addEventListener("click", hideModal);
+    actions.appendChild(okBtn);
+  });
+  actions.append(laterBtn, claimBtn);
+  modal.classList.remove("hidden");
+}
+
 // ---------- Init ----------
 initSparkles();
 initHomePathSparkles();
@@ -1220,4 +1283,16 @@ setupSwipe();
 applyTheme();
 renderMap();
 applyWorldProgression();
+// auto-claim location rewards for already-completed gardens (migration-friendly)
+let claimedAny = false;
+for (const g of GARDENS) {
+  const gardenLevels = LEVELS.filter(l => l.gardenId === g.id);
+  const complete = gardenLevels.length > 0 && gardenLevels.every(l => (state.starsEarned[l.id] || 0) > 0);
+  if (complete && !isLocationRewardClaimed(state, g.id)) {
+    claimLocationReward(state, g.id);
+    claimedAny = true;
+  }
+}
+if (claimedAny) { saveState(state); updateBoosterUI(); }
 showScreen("home");
+setTimeout(() => { if (!$("#modal") || $("#modal").classList.contains("hidden")) showDailyRewardModal(); }, 500);
