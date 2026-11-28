@@ -1,11 +1,11 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=39";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=40";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade,
   getBoosterCount, spendBooster, addBoosters,
   canClaimDailyReward, claimDailyReward, isLocationRewardClaimed, claimLocationReward
-} from "./state.js?v=39";
-import { GameEngine, SIZE } from "./engine.js?v=39";
+} from "./state.js?v=40";
+import { GameEngine, SIZE } from "./engine.js?v=40";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -21,6 +21,7 @@ let boosterTarget = null; // {kind,r,c}
 let dailyRewardDismissedThisSession = false;
 let shuffling = false;
 let selectedGardenId = GARDENS[0].id;
+let gardenPickedByUser = false;
 let hintMove = null;
 let hintIdleTimer = null;
 let drag = null;
@@ -170,7 +171,7 @@ window.addEventListener("resize", () => {
 
 $("#homeBtn").addEventListener("click", () => { showScreen("home"); renderMap(); });
 $("#homeBtn").addEventListener("keydown", (e) => { if (e.key === "Enter") { showScreen("home"); renderMap(); } });
-$("#backToMapBtn").addEventListener("click", () => { showScreen("path"); renderMap(); });
+$("#backToMapBtn").addEventListener("click", () => { gardenPickedByUser = false; showScreen("path"); renderMap(); });
 $("#pathBackBtn")?.addEventListener("click", () => { showScreen("home"); });
 $("#worldBackBtn")?.addEventListener("click", () => { showScreen("home"); });
 $("#restartBtn").addEventListener("click", () => { if (currentLevelId) startLevel(currentLevelId); });
@@ -237,7 +238,7 @@ $("#heroineImg")?.addEventListener("click", () => {
   heroineSpeechTimer = setTimeout(() => bubble.classList.remove("is-visible"), 4000);
 });
 
-$("#navPlayBtn")?.addEventListener("click", () => { ensureAudio(); renderMap(); showScreen("path"); });
+$("#navPlayBtn")?.addEventListener("click", () => { ensureAudio(); gardenPickedByUser = false; renderMap(); showScreen("path"); });
 $("#navForestBtn")?.addEventListener("click", () => { ensureAudio(); renderMap(); showScreen("world"); });
 $("#navAchievementsBtn")?.addEventListener("click", () => { ensureAudio(); showAchievementsModal(); });
 
@@ -374,19 +375,21 @@ function renderGardenPath(levels) {
 
   const bg = document.createElement("div");
   bg.className = "garden-path-bg";
-  bg.style.backgroundImage = "url('./img/garden-map-bg.png')";
+  bg.style.backgroundImage = "url('./img/garden-map-bg.png?v=2')";
   wrap.appendChild(bg);
 
   const path = document.createElement("div");
   path.className = "garden-path-nodes";
 
-  // Positions for 14 levels (bottom -> top) as [left%, top%], from garden-map-bg-dots.png red dots
+  // Equal-arc positions along the path centerline (bottom -> top), 14 levels,
+  // relaxed so circles+stars never overlap on small screens.
   const pos = [
-    [46, 97], [44, 86], [53, 80], [60, 72],
-    [56, 65], [47, 58], [43, 50], [51, 43],
-    [61, 38], [61, 30], [52, 24], [43, 19],
-    [44, 10], [53, 3]
+    [43.81, 94.90], [43.42, 86.86], [53.67, 80.03], [63.70, 73.13],
+    [60.09, 65.39], [48.35, 58.89], [39.81, 51.72], [45.34, 44.02],
+    [57.02, 39.09], [65.68, 31.95], [55.86, 25.17], [44.14, 20.65],
+    [37.75, 13.79], [46.56, 6.91]
   ];
+  const treePos = [53.48, 0.63];
 
   levels.forEach((level, idx) => {
     const p = pos[idx] || [50, 95 - idx * 6];
@@ -407,69 +410,92 @@ function renderGardenPath(levels) {
     path.appendChild(node);
   });
 
-  // Castle after level 14
+  // Tree portal after level 14 (top of the path) -> next location: forest
   const lastDone = (state.starsEarned[14] || 0) > 0;
-  const castle = document.createElement("div");
-  castle.className = "path-castle" + (lastDone ? " is-open" : " is-closed");
-  castle.style.left = "50%";
-  castle.style.top = "1.5%";
-  castle.innerHTML = `
-    <div class="path-castle-icon">${lastDone ? "🏰" : "🏰"}</div>
-    <div class="path-castle-label">${lastDone ? "Замок открыт!" : "Замок откроется после 14 уровня"}</div>
+  const tree = document.createElement("button");
+  tree.type = "button";
+  tree.className = "path-tree" + (lastDone ? " is-open" : " is-closed");
+  tree.style.left = treePos[0] + "%";
+  tree.style.top = treePos[1] + "%";
+  tree.innerHTML = `
+    <span class="path-tree-icon">🌳</span>
+    <span class="path-tree-label">${lastDone ? "Древо перехода · Лес" : "Древо · после 14 уровня"}</span>
   `;
-  path.appendChild(castle);
+  tree.addEventListener("click", () => {
+    ensureAudio();
+    gardenPickedByUser = true;
+    selectedGardenId = "forest";
+    renderMap();
+  });
+  path.appendChild(tree);
 
   wrap.appendChild(path);
   return wrap;
 }
 
+function renderLevelGrid(levels) {
+  const grid = document.createElement("div");
+  grid.className = "level-grid level-grid-full";
+  for (const level of levels) {
+    const unlocked = isLevelUnlocked(level.id, state);
+    const stars = state.starsEarned[level.id] || 0;
+    const isCurrent = unlocked && stars === 0 && (level.id === 1 || (state.starsEarned[level.id - 1] || 0) > 0);
+    const btn = document.createElement("button");
+    btn.className = "level-node" + (unlocked ? "" : " is-locked") + (isCurrent ? " is-current" : "");
+    btn.disabled = !unlocked;
+    btn.innerHTML = `
+      <div class="level-num">Уровень ${level.id}</div>
+      <div class="level-name">${level.title}</div>
+      <div class="level-stars">${[1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("")}</div>
+      ${unlocked ? "" : '<div class="level-lock">🔒</div>'}
+    `;
+    btn.addEventListener("click", () => { ensureAudio(); showLevelBrief(level.id); });
+    grid.appendChild(btn);
+  }
+  return grid;
+}
+
 function renderMap() {
   renderTopbar();
   $("#storyIntro").textContent = STORY_INTRO;
-  const total = LEVELS.length;
-  const completed = LEVELS.filter((l) => (state.starsEarned[l.id] || 0) > 0).length;
-  const pct = Math.round((completed / total) * 100);
-  $("#storyProgressFill").style.width = pct + "%";
-  $("#storyProgressText").textContent = pct + "%";
-  $("#levelProgressText").textContent = `${completed}/${total} уровней`;
 
   // pick garden for UI: current unlocked level's garden
   const current = LEVELS.find((l) => isLevelUnlocked(l.id, state) && (state.starsEarned[l.id] || 0) === 0) || LEVELS[LEVELS.length - 1];
-  if (current) selectedGardenId = current.gardenId;
+  if (current && !gardenPickedByUser) selectedGardenId = current.gardenId;
+
+  // location chips
+  const chips = $("#pathChips");
+  if (chips) {
+    chips.innerHTML = "";
+    for (const garden of GARDENS) {
+      const btn = document.createElement("button");
+      btn.className = "path-chip" + (garden.id === selectedGardenId ? " is-active" : "");
+      btn.type = "button";
+      btn.setAttribute("role", "tab");
+      btn.setAttribute("aria-selected", garden.id === selectedGardenId ? "true" : "false");
+      btn.textContent = garden.name;
+      btn.addEventListener("click", () => {
+        ensureAudio();
+        gardenPickedByUser = true;
+        selectedGardenId = garden.id;
+        renderMap();
+      });
+      chips.appendChild(btn);
+    }
+  }
+  const starChip = $("#pathStarBank");
+  if (starChip) starChip.textContent = String(starBank(state, UPGRADES));
+
+  const garden = GARDENS.find((g) => g.id === selectedGardenId) || GARDENS[0];
+  const levels = LEVELS.filter((l) => l.gardenId === garden.id);
 
   const map = $("#levelMap");
   map.innerHTML = "";
-  for (const garden of GARDENS) {
-    const section = document.createElement("div");
-    section.className = "map-garden";
-    const levels = LEVELS.filter((l) => l.gardenId === garden.id);
-    const done = levels.filter((l) => (state.starsEarned[l.id] || 0) > 0).length;
-    section.innerHTML = `<div class="map-garden-head"><div><div class="map-garden-name">${garden.name}</div><div class="map-garden-meta">${done}/${levels.length} уровней</div></div></div>`;
-
-    if (garden.id === "garden") {
-      section.appendChild(renderGardenPath(levels));
-    } else {
-      const grid = document.createElement("div");
-      grid.className = "level-grid";
-      for (const level of levels) {
-        const unlocked = isLevelUnlocked(level.id, state);
-        const stars = state.starsEarned[level.id] || 0;
-        const isCurrent = unlocked && stars === 0 && (level.id === 1 || (state.starsEarned[level.id - 1] || 0) > 0);
-        const btn = document.createElement("button");
-        btn.className = "level-node" + (unlocked ? "" : " is-locked") + (isCurrent ? " is-current" : "");
-        btn.disabled = !unlocked;
-        btn.innerHTML = `
-          <div class="level-num">Уровень ${level.id}</div>
-          <div class="level-name">${level.title}</div>
-          <div class="level-stars">${[1,2,3].map(i => `<span class="${i <= stars ? "earned" : ""}">★</span>`).join("")}</div>
-          ${unlocked ? "" : '<div class="level-lock">🔒</div>'}
-        `;
-        btn.addEventListener("click", () => { ensureAudio(); showLevelBrief(level.id); });
-        grid.appendChild(btn);
-      }
-      section.appendChild(grid);
-    }
-    map.appendChild(section);
+  map.className = "level-map" + (garden.id === "garden" ? " level-map-path" : " level-map-grid");
+  if (garden.id === "garden") {
+    map.appendChild(renderGardenPath(levels));
+  } else {
+    map.appendChild(renderLevelGrid(levels));
   }
 
   renderWorld();

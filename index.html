@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:wght@500;600;700&family=Gabriela&family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css?v=39">
+  <link rel="stylesheet" href="./styles.css?v=40">
 </head>
 <body>
   <div id="app">
@@ -72,17 +72,11 @@
 
       <!-- PATH / LEVELS -->
       <section id="screen-path" class="screen">
-        <div class="panel path-panel">
-          <div class="panel-head path-head">
-            <div>
-              <p class="eyebrow">Тропинка приключений</p>
-              <h2>В путь</h2>
-            </div>
-            <button class="btn btn-ghost" id="pathBackBtn">← На главную</button>
-          </div>
-          <div class="path-progress">
-            <div class="progress-bar"><div class="progress-fill" id="storyProgressFill"></div></div>
-            <div class="progress-meta"><span id="storyProgressText">0%</span><span id="levelProgressText">0/0 уровней</span></div>
+        <div class="path-full">
+          <div class="path-topbar">
+            <button class="btn btn-ghost path-back" id="pathBackBtn">← На главную</button>
+            <div id="pathChips" class="path-chips" role="tablist" aria-label="Локации"></div>
+            <div class="path-star-chip">★ <span id="pathStarBank">0</span></div>
           </div>
           <div id="levelMap" class="level-map"></div>
         </div>
@@ -172,6 +166,6 @@
     </div>
   </div>
 
-  <script type="module" src="./src/main.js?v=39"></script>
+  <script type="module" src="./src/main.js?v=40"></script>
 </body>
 </html>
