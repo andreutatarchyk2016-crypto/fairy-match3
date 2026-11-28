@@ -1,11 +1,11 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=34";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=35";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade,
   getBoosterCount, spendBooster, addBoosters,
   canClaimDailyReward, claimDailyReward, isLocationRewardClaimed, claimLocationReward
-} from "./state.js?v=34";
-import { GameEngine, SIZE } from "./engine.js?v=34";
+} from "./state.js?v=35";
+import { GameEngine, SIZE } from "./engine.js?v=35";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -380,12 +380,12 @@ function renderGardenPath(levels) {
   const path = document.createElement("div");
   path.className = "garden-path-nodes";
 
-  // Positions for 14 levels (bottom -> top) as [left%, top%]
+  // Positions for 14 levels (bottom -> top) as [left%, top%], sampled from path
   const pos = [
-    [50, 93], [28, 87], [50, 81], [72, 75],
-    [52, 69], [30, 63], [52, 57], [72, 51],
-    [52, 45], [30, 39], [52, 33], [72, 27],
-    [52, 20], [32, 13]
+    [43, 94], [44, 88], [58, 81], [65, 75],
+    [61, 68], [49, 62], [41, 55], [41, 49],
+    [54, 42], [64, 36], [62, 29], [49, 23],
+    [38, 16], [46, 10]
   ];
 
   levels.forEach((level, idx) => {
@@ -411,8 +411,8 @@ function renderGardenPath(levels) {
   const lastDone = (state.starsEarned[14] || 0) > 0;
   const castle = document.createElement("div");
   castle.className = "path-castle" + (lastDone ? " is-open" : " is-closed");
-  castle.style.left = "52%";
-  castle.style.top = "4%";
+  castle.style.left = "50%";
+  castle.style.top = "3.5%";
   castle.innerHTML = `
     <div class="path-castle-icon">${lastDone ? "🏰" : "🏰"}</div>
     <div class="path-castle-label">${lastDone ? "Замок открыт!" : "Замок откроется после 14 уровня"}</div>
