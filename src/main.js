@@ -1,11 +1,11 @@
-import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=32";
+import { LEVELS, UPGRADES, GARDENS, TILE_TYPES, STORY_INTRO } from "./data.js?v=33";
 import {
   loadState, saveState, totalStarsEarned, starBank, starsSpent,
   isLevelUnlocked, recordLevelResult, buildUpgrade,
   getBoosterCount, spendBooster, addBoosters,
   canClaimDailyReward, claimDailyReward, isLocationRewardClaimed, claimLocationReward
-} from "./state.js?v=32";
-import { GameEngine, SIZE } from "./engine.js?v=32";
+} from "./state.js?v=33";
+import { GameEngine, SIZE } from "./engine.js?v=33";
 
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => Array.from(document.querySelectorAll(s));
@@ -1026,7 +1026,6 @@ async function onTileClick(e) {
       updateBoosterUI();
       if (kind === "hammer") await engine.activateHammer(r, c);
       else await engine.activateBomb(r, c);
-      renderBoard(engine.board, []);
       updateHUD();
     } else {
       boosterTarget = { kind, r, c };
